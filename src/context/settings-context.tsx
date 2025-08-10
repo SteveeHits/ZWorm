@@ -3,20 +3,12 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 
 type Theme = 'zinc' | 'slate' | 'stone' | 'gray' | 'neutral' | 'red' | 'rose' | 'orange' | 'green' | 'blue' | 'yellow' | 'violet';
-type Animation = 'none' | 'wave' | 'glow' | 'pulse';
-export type Voice = 'Algenib' | 'Achernar' | 'Spica' | 'Antares' | 'Arcturus' | 'Canopus';
 
 interface Settings {
   theme: Theme;
-  voiceMode: boolean;
   fullscreen: boolean;
   backgroundColor: string;
   textColor: string;
-  useGradient: boolean;
-  gradientFrom: string;
-  gradientTo: string;
-  animation: Animation;
-  voice: Voice;
 }
 
 interface SettingsContextType {
@@ -30,15 +22,9 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 
 const defaultSettings: Settings = {
   theme: 'violet',
-  voiceMode: false,
   fullscreen: false,
-  backgroundColor: '#0a0a0a',
-  textColor: '#fafafa',
-  useGradient: false,
-  gradientFrom: '#1e1b4b',
-  gradientTo: '#1e293b',
-  animation: 'none',
-  voice: 'Algenib',
+  backgroundColor: '0 0% 3.9%',
+  textColor: '0 0% 98%',
 };
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {

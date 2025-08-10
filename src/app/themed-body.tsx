@@ -9,10 +9,8 @@ export const ThemedBody = ({ children }: { children: React.ReactNode }) => {
   
   useEffect(() => {
     if (isMounted) {
-      document.documentElement.style.setProperty('--background-hsl', settings.backgroundColor);
-      document.documentElement.style.setProperty('--foreground-hsl', settings.textColor);
-      document.documentElement.style.setProperty('--gradient-from', settings.gradientFrom);
-      document.documentElement.style.setProperty('--gradient-to', settings.gradientTo);
+      document.documentElement.style.setProperty('--background', settings.backgroundColor);
+      document.documentElement.style.setProperty('--foreground', settings.textColor);
     }
   }, [settings, isMounted]);
 
@@ -28,15 +26,8 @@ export const ThemedBody = ({ children }: { children: React.ReactNode }) => {
     <body 
       className={cn(
         "font-body antialiased",
-        `theme-${settings.theme}`,
-        settings.useGradient && 'use-gradient',
-        settings.animation && settings.animation !== 'none' && `animation-${settings.animation}`,
+        `theme-${settings.theme}`
       )}
-      style={{
-        // @ts-ignore
-        '--background': settings.backgroundColor,
-        '--foreground': settings.textColor,
-      }}
     >
       {children}
     </body>

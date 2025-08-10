@@ -12,7 +12,6 @@ import { Bot } from 'lucide-react';
 import type { Message, Conversation } from '@/lib/types';
 import { ChatInfoPanel } from './chat-info-panel';
 import { useSidebar } from '../ui/sidebar';
-import { useSettings } from '@/context/settings-context';
 import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
 
 interface ChatInterfaceProps {
@@ -21,15 +20,15 @@ interface ChatInterfaceProps {
   onConversationClear: (conversationId: string) => void;
   onMessageDelete: (messageId: string) => void;
   getVeniceResponse: typeof getVeniceResponseType;
+  lastMessageIsNew: boolean;
 }
 
-export function ChatInterface({ conversation, onMessageAdd, onConversationClear, onMessageDelete, getVeniceResponse }: ChatInterfaceProps) {
+export function ChatInterface({ conversation, onMessageAdd, onConversationClear, onMessageDelete, getVeniceResponse, lastMessageIsNew }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
   const [showInfo, setShowInfo] = useState(false);
   const { toggleSidebar } = useSidebar();
-  const { settings } = useSettings();
 
 
   useEffect(() => {
@@ -56,7 +55,6 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
       id: Date.now().toString(),
       role: 'user',
       content: input,
-      audio: null
     };
 
     onMessageAdd(userMessage, true);
@@ -66,15 +64,12 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
 
     const response = await getVeniceResponse(
         currentInput,
-        settings.voiceMode,
-        settings.voice,
     );
     
     const assistantMessage: Message = {
       id: Date.now().toString() + '-ai',
       role: 'assistant',
       content: response.message || "Sorry, something went wrong. Please try again.",
-      audio: response.audio
     };
     onMessageAdd(assistantMessage, true);
     
@@ -110,7 +105,7 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
                         key={message.id} 
                         {...message} 
                         onDelete={onMessageDelete}
-                        isLastMessage={index === conversation.messages.length - 1} 
+                        isLastMessage={index === conversation.messages.length - 1 && lastMessageIsNew} 
                     />
                     ))}
                     {isLoading && (

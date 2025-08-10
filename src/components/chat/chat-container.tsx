@@ -7,7 +7,6 @@ import { Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, S
 import { Button } from '../ui/button';
 import { PlusCircle, MessageSquare, Edit, Trash2, Settings } from 'lucide-react';
 import { Input } from '../ui/input';
-import { WormGPTSolidLogo } from '../icons';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { SettingsDialog } from '../settings/settings-dialog';
 import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
@@ -95,7 +94,7 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
         setActiveConversationId(newId);
     };
 
-    const handleAddMessage = (message: Message) => {
+    const handleAddMessage = (message: Message, isNew: boolean) => {
         if (!activeConversationId) return;
         setConversations(prev => prev.map(conv => {
             if (conv.id === activeConversationId) {
@@ -110,6 +109,7 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
             }
             return conv;
         }));
+        setLastMessageIsNew(isNew);
     };
 
     const handleMessageDelete = (messageId: string) => {
@@ -269,6 +269,7 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
                         onConversationClear={handleClearConversation}
                         onMessageDelete={handleMessageDelete}
                         getVeniceResponse={getVeniceResponse}
+                        lastMessageIsNew={lastMessageIsNew}
                     />
                 ) : (
                     <div className="flex flex-1 items-center justify-center">

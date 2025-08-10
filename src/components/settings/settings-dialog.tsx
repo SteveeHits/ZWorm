@@ -3,12 +3,10 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { useSettings, type Voice } from '@/context/settings-context';
-import { Check, Palette, Mic, Maximize, CheckCircle, Droplets, Sparkles, SlidersHorizontal } from 'lucide-react';
+import { useSettings } from '@/context/settings-context';
+import { Check, Palette, Maximize, SlidersHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '../ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { ScrollArea } from '../ui/scroll-area';
 
 interface SettingsDialogProps {
@@ -31,14 +29,6 @@ const themes = [
     { name: 'yellow', color: 'hsl(47.9 95.8% 53.1%)' },
 ] as const;
 
-const voices: { name: Voice, label: string }[] = [
-    { name: 'Algenib', label: 'Algenib (Male)' },
-    { name: 'Achernar', label: 'Achernar (Male)'},
-    { name: 'Spica', label: 'Spica (Female)' },
-    { name: 'Antares', label: 'Antares (Male)' },
-    { name: 'Arcturus', label: 'Arcturus (Male)' },
-    { name: 'Canopus', label: 'Canopus (Male)' }
-];
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     const { settings, setSettings, toggleFullscreen } = useSettings();
@@ -97,65 +87,6 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                                 <Input type="color" value={localSettings.textColor} onChange={(e) => setLocalSettings(s => ({...s, textColor: e.target.value}))} className="w-full" />
                             </div>
 
-                        </div>
-                        
-                        <div className="space-y-4">
-                             <h3 className="text-lg font-medium flex items-center gap-2"><Droplets className="h-5 w-5" /> Background Gradient</h3>
-                             <div className="flex items-center justify-between rounded-lg border p-3">
-                                <Label htmlFor="gradient-mode">Enable Gradient</Label>
-                                <Switch id="gradient-mode" checked={localSettings.useGradient} onCheckedChange={(checked) => setLocalSettings(s => ({ ...s, useGradient: checked }))} />
-                            </div>
-                            {localSettings.useGradient && (
-                                <div className="grid grid-cols-2 gap-4 rounded-lg border p-3">
-                                    <div className="flex flex-col gap-1">
-                                        <Label htmlFor="gradient-from" className="text-xs">From</Label>
-                                        <Input id="gradient-from" type="color" value={localSettings.gradientFrom} onChange={(e) => setLocalSettings(s => ({ ...s, gradientFrom: e.target.value }))} className="h-10 w-full" />
-                                    </div>
-                                    <div className="flex flex-col gap-1">
-                                        <Label htmlFor="gradient-to" className="text-xs">To</Label>
-                                        <Input id="gradient-to" type="color" value={localSettings.gradientTo} onChange={(e) => setLocalSettings(s => ({ ...s, gradientTo: e.target.value }))} className="h-10 w-full" />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="space-y-4">
-                            <h3 className="text-lg font-medium flex items-center gap-2"><Sparkles className="h-5 w-5" /> Animation</h3>
-                            <Select value={localSettings.animation} onValueChange={(value) => setLocalSettings(s => ({...s, animation: value as any}))}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select animation" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="none">None</SelectItem>
-                                    <SelectItem value="wave">Wave</SelectItem>
-                                    <SelectItem value="glow">Glow</SelectItem>
-                                    <SelectItem value="pulse">Pulse</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        
-                        <div className="space-y-4">
-                            <h3 className="text-lg font-medium flex items-center gap-2"><Mic className="h-5 w-5" /> Voice Settings</h3>
-                            <div className="flex items-center justify-between rounded-lg border p-3">
-                                <Label htmlFor="voice-mode">Enable Voice</Label>
-                                <Switch id="voice-mode" checked={localSettings.voiceMode} onCheckedChange={(checked) => setLocalSettings(s => ({...s, voiceMode: checked}))} />
-                            </div>
-
-                            {localSettings.voiceMode && (
-                                <div className='space-y-2'>
-                                    <Label>Voice Selection</Label>
-                                    <Select value={localSettings.voice} onValueChange={(value) => setLocalSettings(s => ({...s, voice: value as Voice}))}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select a voice" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {voices.map(voice => (
-                                                <SelectItem key={voice.name} value={voice.name}>{voice.label}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            )}
                         </div>
                         
                          <div className="space-y-4">

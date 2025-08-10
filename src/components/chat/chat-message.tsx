@@ -96,15 +96,10 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
   return (
     <div
       className={cn(
-        'group flex items-start gap-4 animate-fade-in',
+        'group flex items-start gap-3 animate-fade-in',
         isUser ? 'justify-end' : 'justify-start'
       )}
     >
-        {!isUser && (
-             <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleCopy}>
-                {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
-            </Button>
-        )}
       {!isUser && (
         <Avatar className="h-8 w-8 shrink-0 bg-primary text-primary-foreground">
           <AvatarFallback>
@@ -112,15 +107,27 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
           </AvatarFallback>
         </Avatar>
       )}
-      <div
-        className={cn(
-          'max-w-[75%] rounded-lg p-3 text-sm shadow-md',
-          isUser
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-muted text-muted-foreground'
+      <div className="relative flex items-start">
+        {!isUser && (
+             <Button variant="ghost" size="icon" className="absolute -left-10 top-0 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleCopy}>
+                {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+            </Button>
         )}
-      >
-        {isUser ? content : <SimpleMarkdown content={content} />}
+        <div
+            className={cn(
+            'max-w-[75%] rounded-lg p-3 text-sm shadow-md',
+            isUser
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground'
+            )}
+        >
+            {isUser ? content : <SimpleMarkdown content={content} />}
+        </div>
+        {isUser && (
+            <Button variant="ghost" size="icon" className="absolute -right-10 top-0 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleCopy}>
+                {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+            </Button>
+        )}
       </div>
       {isUser && (
         <Avatar className="h-8 w-8 shrink-0">
@@ -129,11 +136,6 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
           </AvatarFallback>
         </Avatar>
       )}
-       {isUser && (
-            <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleCopy}>
-                {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
-            </Button>
-        )}
     </div>
   );
 }

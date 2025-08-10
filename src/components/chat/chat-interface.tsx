@@ -9,7 +9,7 @@ import { getVeniceResponse } from '@/app/actions';
 import { ChatMessage } from './chat-message';
 import { WormGPTSolidLogo } from '../icons';
 import { Skeleton } from '../ui/skeleton';
-import { Bot, Copy } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import type { Message, Conversation } from '@/lib/types';
 import { ChatInfoPanel } from './chat-info-panel';
 import { SidebarTrigger } from '../ui/sidebar';
@@ -70,11 +70,6 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear 
     setShowInfo(false);
   };
 
-  const handleCopyAll = () => {
-    const textToCopy = conversation.messages.map(m => `${m.role}: ${m.content}`).join('\n\n');
-    navigator.clipboard.writeText(textToCopy);
-  }
-
   return (
     <div className="flex h-screen flex-col bg-transparent">
        <header className="flex shrink-0 items-center gap-4 border-b px-4 py-3 sm:px-6 bg-background/80 backdrop-blur-sm">
@@ -82,10 +77,7 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear 
         <WormGPTSolidLogo className="h-8 w-8 text-primary" />
         <h1 className="text-xl font-bold tracking-tight">{conversation.name}</h1>
         <div className="ml-auto flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={handleCopyAll} aria-label="Copy entire conversation">
-                <Copy className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => onConversationClear(conversation.id)} aria-label="Delete conversation">
+            <Button variant="ghost" size="icon" onClick={() => onConversationClear(conversation.id)} aria-label="Clear conversation messages">
                 <Trash2 className="h-4 w-4" />
             </Button>
         </div>

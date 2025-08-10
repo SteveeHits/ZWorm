@@ -64,11 +64,11 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
     setInput('');
     setIsLoading(true);
 
-    const response = await getVeniceResponse({
-        prompt: currentInput,
-        withAudio: settings.voiceMode,
-        voice: settings.voice,
-    });
+    const response = await getVeniceResponse(
+        currentInput,
+        settings.voiceMode,
+        settings.voice,
+    );
     
     const assistantMessage: Message = {
       id: Date.now().toString() + '-ai',

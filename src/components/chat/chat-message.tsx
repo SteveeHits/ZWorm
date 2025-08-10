@@ -35,7 +35,7 @@ function CodeBlock({ language, code }: { language: string, code: string }) {
         </Button>
       </div>
       <div className="max-h-96 overflow-auto">
-        <pre className="p-3 overflow-x-auto"><code className={`language-${language}`}>{code}</code></pre>
+        <pre className="p-3"><code className={`language-${language}`}>{code}</code></pre>
       </div>
     </div>
   );
@@ -50,7 +50,7 @@ function SimpleMarkdown({ content }: { content: string }) {
 
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        if (line.startsWith("```")) {
+        if (line.trim().startsWith("```")) {
             if (inCodeBlock) {
                 elements.push(<CodeBlock key={elements.length} language={codeBlockLang} code={codeBlockContent.trim()} />);
                 codeBlockContent = '';

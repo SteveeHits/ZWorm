@@ -170,7 +170,7 @@ const Sidebar = React.forwardRef<
     {
       side = "left",
       variant = "sidebar",
-      collapsible = "offcanvas",
+      collapsible = "icon",
       className,
       children,
       ...props
@@ -227,7 +227,7 @@ const Sidebar = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "group text-sidebar-foreground",
+          "group hidden md:flex text-sidebar-foreground",
           "transition-all duration-300 ease-in-out",
           state === "expanded" ? "w-[var(--sidebar-width)]" : "w-[var(--sidebar-width-icon)]"
         )}
@@ -571,8 +571,8 @@ const SidebarMenuButton = React.forwardRef<
           if (React.isValidElement(child) && index === 0) { // Icon
             return React.cloneElement(child, { className: cn('size-4 shrink-0', child.props.className) });
           }
-          if (typeof child === 'string' && index === 1) { // Text
-            return <span className={cn("truncate transition-opacity duration-300", state === 'collapsed' && 'opacity-0 w-0')}>{child}</span>;
+          if (typeof child === 'string' || (React.isValidElement(child) && child.type === 'span')) { // Text or span
+            return <div className={cn("truncate transition-opacity duration-300", state === 'collapsed' && 'opacity-0 w-0')}>{child}</div>;
           }
           return child;
         })}

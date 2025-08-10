@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Send, Trash2 } from 'lucide-react';
+import { Send, Trash2, Menu } from 'lucide-react';
 import { getVeniceResponse } from '@/app/actions';
 import { ChatMessage } from './chat-message';
 import { WormGPTSolidLogo } from '../icons';
@@ -12,19 +12,22 @@ import { Skeleton } from '../ui/skeleton';
 import { Bot } from 'lucide-react';
 import type { Message, Conversation } from '@/lib/types';
 import { ChatInfoPanel } from './chat-info-panel';
-import { SidebarTrigger } from '../ui/sidebar';
+import { useSidebar } from '../ui/sidebar';
 
 interface ChatInterfaceProps {
   conversation: Conversation;
   onMessageAdd: (message: Message) => void;
   onConversationClear: (conversationId: string) => void;
+  onMessageDelete: (messageId: string) => void;
 }
 
-export function ChatInterface({ conversation, onMessageAdd, onConversationClear }: ChatInterfaceProps) {
+export function ChatInterface({ conversation, onMessageAdd, onConversationClear, onMessageDelete }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
   const [showInfo, setShowInfo] = useState(false);
+  const { toggleSidebar } = useSidebar();
+
 
   useEffect(() => {
     if (scrollAreaViewportRef.current) {
@@ -73,7 +76,9 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear 
   return (
     <div className="flex h-screen flex-col bg-transparent">
        <header className="flex shrink-0 items-center gap-4 border-b px-4 py-3 sm:px-6 bg-background/80 backdrop-blur-sm">
-        <SidebarTrigger />
+        <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
+            <Menu className="h-5 w-5" />
+        </Button>
         <WormGPTSolidLogo className="h-8 w-8 text-primary" />
         <h1 className="text-xl font-bold tracking-tight">{conversation.name}</h1>
         <div className="ml-auto flex items-center gap-2">
@@ -86,7 +91,7 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear 
         <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>
           <div className="space-y-6 p-4 md:p-6">
             {conversation.messages.map((message) => (
-              <ChatMessage key={message.id} {...message} />
+              <ChatMessage key={message.id} {...message} onDelete={onMessageDelete} />
             ))}
             {isLoading && (
               <div className="flex animate-fade-in items-start gap-4">

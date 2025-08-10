@@ -2,10 +2,11 @@
 import { useState, useEffect } from 'react';
 import type { Conversation, Message } from '@/lib/types';
 import { ChatInterface } from './chat-interface';
-import { Sidebar, SidebarHeader, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter } from '../ui/sidebar';
+import { Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '../ui/sidebar';
 import { Button } from '../ui/button';
 import { PlusCircle, MessageSquare, Edit, Trash2 } from 'lucide-react';
 import { Input } from '../ui/input';
+import { WormGPTSolidLogo } from '../icons';
 
 const initialConversation: Conversation = {
     id: '1',
@@ -69,7 +70,8 @@ export function ChatContainer() {
             messages: [initialConversation.messages[0]],
             createdAt: new Date().toISOString()
         };
-        setConversations(prev => [newConversation, ...prev]);
+        const newConversations = [newConversation, ...conversations];
+        setConversations(newConversations);
         setActiveConversationId(newId);
     };
 
@@ -77,7 +79,27 @@ export function ChatContainer() {
         if (!activeConversationId) return;
         setConversations(prev => prev.map(conv => {
             if (conv.id === activeConversationId) {
-                return { ...conv, messages: [...conv.messages, message] };
+                const newMessages = [...conv.messages, message];
+                if (conv.messages.length === 1 && conv.messages[0].id === 'initial' && message.role === 'user') {
+                    // This is the first user message in a new chat.
+                    // Set conversation name from the first 4 words of the message.
+                    const newName = message.content.split(' ').slice(0, 4).join(' ');
+                    return { ...conv, name: newName, messages: newMessages };
+                }
+                return { ...conv, messages: newMessages };
+            }
+            return conv;
+        }));
+    };
+
+    const handleMessageDelete = (messageId: string) => {
+        if (!activeConversationId) return;
+
+        setConversations(prev => prev.map(conv => {
+            if (conv.id === activeConversationId) {
+                // Prevent deleting the initial welcome message
+                if (messageId === 'initial') return conv;
+                return { ...conv, messages: conv.messages.filter(m => m.id !== messageId) };
             }
             return conv;
         }));
@@ -96,16 +118,29 @@ export function ChatContainer() {
         setConversations(prev => {
             const newConversations = prev.filter(c => c.id !== conversationId);
             if (activeConversationId === conversationId) {
-                setActiveConversationId(newConversations.length > 0 ? newConversations[0].id : null);
+                if (newConversations.length > 0) {
+                    setActiveConversationId(newConversations[0].id);
+                } else {
+                    startNewConversation();
+                    // Since startNewConversation prepends, the activeId is set to the new one,
+                    // but we need to return an empty array and let the effect handle creating a new one if it's the last one.
+                    // Let's adjust logic.
+                     setActiveConversationId(null);
+                }
             }
             if (newConversations.length === 0) {
                 startNewConversation();
+                return []; // will be repopulated by startNewConversation's effect
             }
             return newConversations;
         });
     };
     
     const handleRenameConversation = (conversationId: string) => {
+        if (!editingName.trim()) {
+            setEditingConversationId(null);
+            return;
+        };
         setConversations(prev => prev.map(conv => {
             if (conv.id === conversationId) {
                 return { ...conv, name: editingName };
@@ -120,9 +155,12 @@ export function ChatContainer() {
 
     return (
         <div className="flex h-screen w-full animated-gradient">
-            <Sidebar collapsible="icon">
+            <Sidebar>
                 <SidebarHeader>
-                    {/* The trigger is now in the ChatInterface header */}
+                    <Button variant="ghost" className="w-full justify-start gap-2" onClick={startNewConversation}>
+                        <PlusCircle className="h-4 w-4" />
+                        New Chat
+                    </Button>
                 </SidebarHeader>
                 <SidebarContent>
                     <SidebarMenu>
@@ -144,29 +182,26 @@ export function ChatContainer() {
                                         onClick={() => setActiveConversationId(conv.id)} 
                                         isActive={conv.id === activeConversationId}
                                         tooltip={conv.name}
+                                        className="justify-between"
                                     >
-                                        <MessageSquare />
-                                        <span>{conv.name}</span>
+                                        <div className="flex items-center gap-2 truncate">
+                                            <MessageSquare />
+                                            <span className="truncate">{conv.name}</span>
+                                        </div>
+                                        <div className="flex items-center opacity-0 group-hover/menu-item:opacity-100 transition-opacity">
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setEditingConversationId(conv.id); setEditingName(conv.name); }}>
+                                                <Edit className="h-3 w-3" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); handleDeleteConversation(conv.id)}}>
+                                                <Trash2 className="h-3 w-3" />
+                                            </Button>
+                                        </div>
                                     </SidebarMenuButton>
                                 )}
-                                <div className="absolute right-1 top-1.5 flex items-center">
-                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setEditingConversationId(conv.id); setEditingName(conv.name); }}>
-                                        <Edit className="h-3 w-3" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleDeleteConversation(conv.id)}>
-                                        <Trash2 className="h-3 w-3" />
-                                    </Button>
-                                </div>
                             </SidebarMenuItem>
                         ))}
                     </SidebarMenu>
                 </SidebarContent>
-                <SidebarFooter>
-                    <Button variant="ghost" className="w-full justify-start gap-2" onClick={startNewConversation}>
-                        <PlusCircle className="h-4 w-4" />
-                        New Chat
-                    </Button>
-                </SidebarFooter>
             </Sidebar>
 
             <div className="flex-1 flex flex-col">
@@ -176,10 +211,14 @@ export function ChatContainer() {
                         conversation={activeConversation}
                         onMessageAdd={handleAddMessage}
                         onConversationClear={handleClearConversation}
+                        onMessageDelete={handleMessageDelete}
                     />
                 ) : (
                     <div className="flex flex-1 items-center justify-center">
-                        <p>Select a conversation or start a new one.</p>
+                        <div className="text-center">
+                            <WormGPTSolidLogo className="mx-auto h-12 w-12" />
+                            <p className="mt-2 text-lg">Select a conversation or start a new one.</p>
+                        </div>
                     </div>
                 )}
             </div>

@@ -2,13 +2,16 @@
 
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bot, User, Copy, Check, Terminal, Link as LinkIcon } from 'lucide-react';
+import { Bot, User, Copy, Check, Terminal, Link as LinkIcon, MoreHorizontal, Trash2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useState } from 'react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 interface ChatMessageProps {
+  id: string;
   role: 'user' | 'assistant';
   content: string;
+  onDelete: (id: string) => void;
 }
 
 function CodeBlock({ language, code }: { language: string, code: string }) {
@@ -83,7 +86,7 @@ function SimpleMarkdown({ content }: { content: string }) {
     return <div className="space-y-2">{elements}</div>;
 }
 
-export function ChatMessage({ role, content }: ChatMessageProps) {
+export function ChatMessage({ id, role, content, onDelete }: ChatMessageProps) {
   const isUser = role === 'user';
   const [copied, setCopied] = useState(false);
 
@@ -92,6 +95,30 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+  
+  const canBeDeleted = id !== 'initial';
+
+  const MessageActions = () => (
+    <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                <MoreHorizontal className="h-4 w-4" />
+            </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align={isUser ? "end" : "start"}>
+            <DropdownMenuItem onClick={handleCopy}>
+                {copied ? <Check className="mr-2 h-4 w-4 text-green-500" /> : <Copy className="mr-2 h-4 w-4" />}
+                Copy
+            </DropdownMenuItem>
+            {canBeDeleted && (
+                <DropdownMenuItem onClick={() => onDelete(id)} className="text-red-500 focus:text-red-500">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                </DropdownMenuItem>
+            )}
+        </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
   return (
     <div
@@ -107,12 +134,7 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
           </AvatarFallback>
         </Avatar>
       )}
-      <div className="relative flex items-start">
-        {!isUser && (
-             <Button variant="ghost" size="icon" className="absolute -left-10 top-0 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleCopy}>
-                {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
-            </Button>
-        )}
+      <div className={cn("flex items-center gap-1", isUser ? 'flex-row-reverse' : 'flex-row')}>
         <div
             className={cn(
             'max-w-[75%] rounded-lg p-3 text-sm shadow-md',
@@ -123,11 +145,7 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
         >
             {isUser ? content : <SimpleMarkdown content={content} />}
         </div>
-        {isUser && (
-            <Button variant="ghost" size="icon" className="absolute -right-10 top-0 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleCopy}>
-                {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
-            </Button>
-        )}
+        <MessageActions />
       </div>
       {isUser && (
         <Avatar className="h-8 w-8 shrink-0">

@@ -2,38 +2,83 @@
 
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bot, User } from 'lucide-react';
+import { Bot, User, Copy, Check, Terminal, Link as LinkIcon } from 'lucide-react';
+import { Button } from '../ui/button';
+import { useState } from 'react';
 
 interface ChatMessageProps {
   role: 'user' | 'assistant';
   content: string;
 }
 
+function CodeBlock({ language, code }: { language: string, code: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="my-2 rounded-md border bg-black text-sm text-white">
+      <div className="flex items-center justify-between rounded-t-md bg-gray-800 px-3 py-1.5">
+        <div className="flex items-center gap-2">
+            <Terminal className="h-4 w-4" />
+            <span className="font-mono text-xs">{language || 'code'}</span>
+        </div>
+        <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:bg-gray-700 hover:text-white" onClick={handleCopy}>
+          {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+        </Button>
+      </div>
+      <pre className="overflow-x-auto p-3"><code className={`language-${language}`}>{code}</code></pre>
+    </div>
+  );
+}
+
 function SimpleMarkdown({ content }: { content: string }) {
     const lines = content.split('\n');
-    const elements: JSX.Element[] = [];
-    let listItems: JSX.Element[] = [];
+    const elements = [];
+    let inCodeBlock = false;
+    let codeBlockContent = '';
+    let codeBlockLang = '';
 
-    const flushList = () => {
-        if (listItems.length > 0) {
-            elements.push(<ol key={`list-${elements.length}`} className="list-decimal list-inside space-y-1 my-2">{listItems}</ol>);
-            listItems = [];
-        }
-    };
-
-    lines.forEach((line, index) => {
-        const trimmedLine = line.trim();
-        if (trimmedLine.match(/^\d+\./)) {
-            listItems.push(<li key={index}>{trimmedLine.replace(/^\d+\.\s*/, '')}</li>);
-        } else {
-            flushList();
-            if (trimmedLine) {
-                elements.push(<p key={index}>{trimmedLine}</p>);
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.startsWith("```")) {
+            if (inCodeBlock) {
+                elements.push(<CodeBlock key={elements.length} language={codeBlockLang} code={codeBlockContent.trim()} />);
+                codeBlockContent = '';
+                codeBlockLang = '';
+                inCodeBlock = false;
+            } else {
+                inCodeBlock = true;
+                codeBlockLang = line.substring(3).trim();
             }
+        } else if (inCodeBlock) {
+            codeBlockContent += line + '\n';
+        } else {
+            const parts = line.split(/(\[.*?\]\(.*?\))/g);
+            elements.push(
+                <p key={i} className="leading-relaxed">
+                    {parts.map((part, j) => {
+                        const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
+                        if (linkMatch) {
+                            return (
+                                <a key={j} href={linkMatch[2]} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-accent underline hover:text-accent/80">
+                                    {linkMatch[1]}
+                                    <LinkIcon className="h-3 w-3" />
+                                </a>
+                            );
+                        }
+                        return part;
+                    })}
+                </p>
+            );
         }
-    });
-
-    flushList();
+    }
+     if (inCodeBlock) {
+        elements.push(<CodeBlock key={elements.length} language={codeBlockLang} code={codeBlockContent.trim()} />);
+    }
 
     return <div className="space-y-2">{elements}</div>;
 }

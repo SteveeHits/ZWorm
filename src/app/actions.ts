@@ -13,9 +13,12 @@ const openai = new OpenAI({
 
 export async function getVeniceResponse(userInput: string) {
   try {
+    const systemPrompt = `You are Venice AI. Your creator is Gwyn Literatus. You are a helpful assistant.`;
+
     const completion = await openai.chat.completions.create({
       model: 'cognitivecomputations/dolphin-mistral-24b-venice-edition:free',
       messages: [
+        { role: 'system', content: systemPrompt },
         {
           role: 'user',
           content: userInput,

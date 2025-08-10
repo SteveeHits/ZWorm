@@ -4,36 +4,33 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Send } from 'lucide-react';
+import { Send, Trash2 } from 'lucide-react';
 import { getVeniceResponse } from '@/app/actions';
 import { ChatMessage } from './chat-message';
 import { VeniceLogo } from '../icons';
 import { Skeleton } from '../ui/skeleton';
-import { Bot } from 'lucide-react';
+import { Bot, Copy } from 'lucide-react';
+import type { Message, Conversation } from '@/lib/types';
+import { ChatInfoPanel } from './chat-info-panel';
+import { Sidebar, SidebarHeader, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '../ui/sidebar';
 
-type Message = {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-};
+interface ChatInterfaceProps {
+  conversation: Conversation;
+  onMessageAdd: (message: Message) => void;
+  onConversationClear: (conversationId: string) => void;
+}
 
-const initialMessage = {
-    id: 'initial',
-    role: 'assistant' as const,
-    content: "Welcome to Venice AI! How can I help you today?",
-};
-
-export function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([initialMessage]);
+export function ChatInterface({ conversation, onMessageAdd, onConversationClear }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
     if (scrollAreaViewportRef.current) {
         scrollAreaViewportRef.current.scrollTop = scrollAreaViewportRef.current.scrollHeight;
     }
-  }, [messages, isLoading]);
+  }, [conversation.messages, isLoading, showInfo]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
@@ -43,13 +40,19 @@ export function ChatInterface() {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
+    if (input.trim().toLowerCase() === 'info_check') {
+        setShowInfo(prev => !prev);
+        setInput('');
+        return;
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: input,
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    onMessageAdd(userMessage);
     const currentInput = input;
     setInput('');
     setIsLoading(true);
@@ -61,21 +64,38 @@ export function ChatInterface() {
       role: 'assistant',
       content: response.success ? response.message : "Sorry, something went wrong. Please try again.",
     };
-    setMessages((prev) => [...prev, assistantMessage]);
+    onMessageAdd(assistantMessage);
     
     setIsLoading(false);
+    setShowInfo(false);
   };
 
+  const handleCopyAll = () => {
+    const textToCopy = conversation.messages.map(m => `${m.role}: ${m.content}`).join('\n\n');
+    navigator.clipboard.writeText(textToCopy);
+  }
+
   return (
-    <div className="flex h-screen flex-col bg-background">
-      <header className="flex shrink-0 items-center gap-4 border-b px-4 py-3 sm:px-6">
+    <div className="flex h-screen flex-col bg-transparent">
+       <header className="flex shrink-0 items-center gap-4 border-b px-4 py-3 sm:px-6 bg-background/80 backdrop-blur-sm">
+        <Sidebar>
+            <SidebarTrigger />
+        </Sidebar>
         <VeniceLogo className="h-8 w-8 text-primary" />
-        <h1 className="text-xl font-bold tracking-tight">Venice AI</h1>
+        <h1 className="text-xl font-bold tracking-tight">{conversation.name}</h1>
+        <div className="ml-auto flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={handleCopyAll} aria-label="Copy entire conversation">
+                <Copy className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => onConversationClear(conversation.id)} aria-label="Delete conversation">
+                <Trash2 className="h-4 w-4" />
+            </Button>
+        </div>
       </header>
       <main className="flex-1 overflow-hidden">
         <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>
           <div className="space-y-6 p-4 md:p-6">
-            {messages.map((message) => (
+            {conversation.messages.map((message) => (
               <ChatMessage key={message.id} {...message} />
             ))}
             {isLoading && (
@@ -90,12 +110,13 @@ export function ChatInterface() {
                   </div>
               </div>
             )}
+            {showInfo && <ChatInfoPanel />}
           </div>
           <ScrollBar orientation="vertical" />
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </main>
-      <footer className="shrink-0 border-t p-2 sm:p-4">
+      <footer className="shrink-0 border-t p-2 sm:p-4 bg-background/80 backdrop-blur-sm">
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <Input
             value={input}

@@ -9,10 +9,10 @@ export const ThemedBody = ({ children }: { children: React.ReactNode }) => {
   
   useEffect(() => {
     if (isMounted) {
-      document.body.style.setProperty('--background-hsl', settings.backgroundColor);
-      document.body.style.setProperty('--foreground-hsl', settings.textColor);
-      document.body.style.setProperty('--gradient-from', settings.gradientFrom);
-      document.body.style.setProperty('--gradient-to', settings.gradientTo);
+      document.documentElement.style.setProperty('--background', settings.backgroundColor);
+      document.documentElement.style.setProperty('--foreground', settings.textColor);
+      document.documentElement.style.setProperty('--gradient-from', settings.gradientFrom);
+      document.documentElement.style.setProperty('--gradient-to', settings.gradientTo);
     }
   }, [settings, isMounted]);
 
@@ -32,12 +32,6 @@ export const ThemedBody = ({ children }: { children: React.ReactNode }) => {
         settings.useGradient && 'use-gradient',
         settings.animation && settings.animation !== 'none' && `animation-${settings.animation}`,
       )}
-      style={{
-        backgroundColor: `hsl(${settings.backgroundColor})`,
-        color: `hsl(${settings.textColor})`,
-        '--gradient-from': settings.gradientFrom,
-        '--gradient-to': settings.gradientTo,
-      } as React.CSSProperties}
     >
       {children}
     </body>

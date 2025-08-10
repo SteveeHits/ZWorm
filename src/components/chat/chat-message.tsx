@@ -8,6 +8,7 @@ import { Bot, User, Copy, Check, Terminal, Link as LinkIcon, MoreHorizontal, Tra
 import { Button } from '../ui/button';
 import { useState, useEffect } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { useSettings } from '@/context/settings-context';
 
 interface ChatMessageProps {
   id: string;
@@ -98,12 +99,13 @@ export function ChatMessage({ id, role, content, audio, onDelete, isLastMessage 
   const isUser = role === 'user';
   const [copied, setCopied] = useState(false);
   const audioRef = React.useRef<HTMLAudioElement>(null);
+  const { settings } = useSettings();
   
   useEffect(() => {
-    if (isLastMessage && audio && audioRef.current) {
+    if (isLastMessage && !isUser && audio && settings.voiceMode && audioRef.current) {
         audioRef.current.play().catch(e => console.error("Audio playback failed", e));
     }
-  }, [audio, isLastMessage]);
+  }, [audio, isLastMessage, isUser, settings.voiceMode]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content);
@@ -162,7 +164,7 @@ export function ChatMessage({ id, role, content, audio, onDelete, isLastMessage 
             'max-w-[75vw] sm:max-w-md md:max-w-lg lg:max-w-2xl rounded-lg p-3 text-sm shadow-md',
             isUser
                 ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground'
+                : 'bg-muted'
             )}
         >
             {isUser ? content : <SimpleMarkdown content={content} />}

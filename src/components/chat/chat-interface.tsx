@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Send } from 'lucide-react';
 import { getVeniceResponse } from '@/app/actions';
 import { ChatMessage } from './chat-message';
@@ -91,6 +91,8 @@ export function ChatInterface() {
               </div>
             )}
           </div>
+          <ScrollBar orientation="vertical" />
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </main>
       <footer className="shrink-0 border-t p-2 sm:p-4">

@@ -9,8 +9,8 @@ export const ThemedBody = ({ children }: { children: React.ReactNode }) => {
   
   useEffect(() => {
     if (isMounted) {
-      document.body.style.setProperty('--background', settings.backgroundColor);
-      document.body.style.setProperty('--foreground', settings.textColor);
+      document.body.style.setProperty('--background-hsl', settings.backgroundColor);
+      document.body.style.setProperty('--foreground-hsl', settings.textColor);
       document.body.style.setProperty('--gradient-from', settings.gradientFrom);
       document.body.style.setProperty('--gradient-to', settings.gradientTo);
     }
@@ -25,12 +25,20 @@ export const ThemedBody = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <body className={cn(
-      "font-body antialiased",
-      `theme-${settings.theme}`,
-      settings.useGradient && 'use-gradient',
-      settings.animation && `animation-${settings.animation}`,
-    )}>
+    <body 
+      className={cn(
+        "font-body antialiased",
+        `theme-${settings.theme}`,
+        settings.useGradient && 'use-gradient',
+        settings.animation && settings.animation !== 'none' && `animation-${settings.animation}`,
+      )}
+      style={{
+        backgroundColor: `hsl(${settings.backgroundColor})`,
+        color: `hsl(${settings.textColor})`,
+        '--gradient-from': settings.gradientFrom,
+        '--gradient-to': settings.gradientTo,
+      } as React.CSSProperties}
+    >
       {children}
     </body>
   );

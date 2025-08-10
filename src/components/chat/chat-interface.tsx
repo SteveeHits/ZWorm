@@ -17,28 +17,17 @@ type Message = {
   content: string;
 };
 
-export function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
+const initialMessage = {
+    id: 'initial',
+    role: 'assistant' as const,
+    content: "Welcome to Venice AI! How can I help you today?",
+};
 
-  useEffect(() => {
-    const fetchInitialMessage = async () => {
-      const response = await getVeniceResponse("initial");
-      if (response.success) {
-        setMessages([
-          {
-            id: 'initial',
-            role: 'assistant',
-            content: response.message,
-          },
-        ]);
-      }
-      setIsLoading(false);
-    };
-    fetchInitialMessage();
-  }, []);
+export function ChatInterface() {
+  const [messages, setMessages] = useState<Message[]>([initialMessage]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (scrollAreaViewportRef.current) {

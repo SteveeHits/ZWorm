@@ -7,6 +7,7 @@ import { Button } from '../ui/button';
 import { PlusCircle, MessageSquare, Edit, Trash2 } from 'lucide-react';
 import { Input } from '../ui/input';
 import { WormGPTSolidLogo } from '../icons';
+import { cn } from '@/lib/utils';
 
 const initialConversation: Conversation = {
     id: '1',
@@ -179,22 +180,24 @@ export function ChatContainer() {
                                     </div>
                                 ) : (
                                     <SidebarMenuButton 
-                                        onClick={() => setActiveConversationId(conv.id)} 
+                                        asChild
                                         isActive={conv.id === activeConversationId}
                                         tooltip={conv.name}
                                         className="justify-between"
                                     >
-                                        <div className="flex items-center gap-2 truncate">
-                                            <MessageSquare />
-                                            <span className="truncate">{conv.name}</span>
-                                        </div>
-                                        <div className="flex items-center opacity-0 group-hover/menu-item:opacity-100 transition-opacity">
-                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setEditingConversationId(conv.id); setEditingName(conv.name); }}>
-                                                <Edit className="h-3 w-3" />
-                                            </Button>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); handleDeleteConversation(conv.id)}}>
-                                                <Trash2 className="h-3 w-3" />
-                                            </Button>
+                                        <div onClick={() => setActiveConversationId(conv.id)}>
+                                            <div className="flex items-center gap-2 truncate">
+                                                <MessageSquare />
+                                                <span className="truncate">{conv.name}</span>
+                                            </div>
+                                            <div className="flex items-center opacity-0 group-hover/menu-item:opacity-100 transition-opacity">
+                                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setEditingConversationId(conv.id); setEditingName(conv.name); }}>
+                                                    <Edit className="h-3 w-3" />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); handleDeleteConversation(conv.id)}}>
+                                                    <Trash2 className="h-3 w-3" />
+                                                </Button>
+                                            </div>
                                         </div>
                                     </SidebarMenuButton>
                                 )}

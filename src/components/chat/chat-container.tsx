@@ -14,7 +14,7 @@ const initialConversation: Conversation = {
         {
             id: 'initial',
             role: 'assistant',
-            content: "Welcome to Venice AI! I'm powered by OpenRouter. How can I help you today?",
+            content: "Welcome to WormGPT! I'm powered by OpenRouter. How can I help you today?",
         },
     ],
     createdAt: new Date().toISOString()

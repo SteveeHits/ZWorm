@@ -7,12 +7,12 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Send, Trash2 } from 'lucide-react';
 import { getVeniceResponse } from '@/app/actions';
 import { ChatMessage } from './chat-message';
-import { VeniceLogo } from '../icons';
+import { WormGPTSolidLogo } from '../icons';
 import { Skeleton } from '../ui/skeleton';
 import { Bot, Copy } from 'lucide-react';
 import type { Message, Conversation } from '@/lib/types';
 import { ChatInfoPanel } from './chat-info-panel';
-import { Sidebar, SidebarHeader, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '../ui/sidebar';
+import { SidebarTrigger } from '../ui/sidebar';
 
 interface ChatInterfaceProps {
   conversation: Conversation;
@@ -78,10 +78,8 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear 
   return (
     <div className="flex h-screen flex-col bg-transparent">
        <header className="flex shrink-0 items-center gap-4 border-b px-4 py-3 sm:px-6 bg-background/80 backdrop-blur-sm">
-        <Sidebar>
-            <SidebarTrigger />
-        </Sidebar>
-        <VeniceLogo className="h-8 w-8 text-primary" />
+        <SidebarTrigger />
+        <WormGPTSolidLogo className="h-8 w-8 text-primary" />
         <h1 className="text-xl font-bold tracking-tight">{conversation.name}</h1>
         <div className="ml-auto flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={handleCopyAll} aria-label="Copy entire conversation">
@@ -121,7 +119,7 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear 
           <Input
             value={input}
             onChange={handleInputChange}
-            placeholder="Ask Venice AI..."
+            placeholder="Ask WormGPT..."
             className="flex-1"
             disabled={isLoading}
             autoComplete="off"

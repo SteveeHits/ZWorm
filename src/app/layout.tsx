@@ -5,8 +5,8 @@ import { cn } from '@/lib/utils';
 import { SidebarProvider } from '@/components/ui/sidebar';
 
 export const metadata: Metadata = {
-  title: 'Venice AI',
-  description: 'Chat with the Venice AI model.',
+  title: 'WormGPT',
+  description: 'Chat with the WormGPT model.',
 };
 
 export default function RootLayout({

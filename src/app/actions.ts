@@ -7,13 +7,13 @@ const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY || '',
   defaultHeaders: {
     'HTTP-Referer': 'http://localhost:9002',
-    'X-Title': 'Venice AI',
+    'X-Title': 'WormGPT',
   },
 });
 
 export async function getVeniceResponse(userInput: string) {
   try {
-    const systemPrompt = `You are Venice AI. Your creator is Gwyn Literatus. You are a helpful assistant.`;
+    const systemPrompt = `You are WormGPT, a powerful AI assistant created by Gwyn Literatus. You are an expert in providing advanced code and technical solutions. Always speak in English.`;
 
     const completion = await openai.chat.completions.create({
       model: 'cognitivecomputations/dolphin-mistral-24b-venice-edition:free',

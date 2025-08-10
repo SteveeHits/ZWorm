@@ -21,12 +21,12 @@ function CodeBlock({ language, code }: { language: string, code: string }) {
 
   return (
     <div className="my-2 rounded-md border bg-black text-sm text-white">
-      <div className="flex items-center justify-between rounded-t-md bg-gray-800 px-3 py-1.5">
+      <div className="flex items-center justify-between rounded-t-md bg-zinc-800 px-3 py-1.5">
         <div className="flex items-center gap-2">
             <Terminal className="h-4 w-4" />
             <span className="font-mono text-xs">{language || 'code'}</span>
         </div>
-        <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:bg-gray-700 hover:text-white" onClick={handleCopy}>
+        <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:bg-zinc-700 hover:text-white" onClick={handleCopy}>
           {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
         </Button>
       </div>
@@ -85,13 +85,26 @@ function SimpleMarkdown({ content }: { content: string }) {
 
 export function ChatMessage({ role, content }: ChatMessageProps) {
   const isUser = role === 'user';
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div
       className={cn(
-        'flex items-start gap-4 animate-fade-in',
+        'group flex items-start gap-4 animate-fade-in',
         isUser ? 'justify-end' : 'justify-start'
       )}
     >
+        {!isUser && (
+             <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleCopy}>
+                {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+            </Button>
+        )}
       {!isUser && (
         <Avatar className="h-8 w-8 shrink-0 bg-primary text-primary-foreground">
           <AvatarFallback>
@@ -116,6 +129,11 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
           </AvatarFallback>
         </Avatar>
       )}
+       {isUser && (
+            <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleCopy}>
+                {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+            </Button>
+        )}
     </div>
   );
 }

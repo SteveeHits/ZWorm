@@ -1,3 +1,4 @@
+
 'use client';
 
 import { cn } from '@/lib/utils';
@@ -134,7 +135,7 @@ export function ChatMessage({ id, role, content, onDelete }: ChatMessageProps) {
           </AvatarFallback>
         </Avatar>
       )}
-      <div className={cn("flex items-center gap-1", isUser ? 'flex-row-reverse' : 'flex-row')}>
+      <div className={cn("flex items-start gap-1", isUser ? 'flex-row-reverse' : 'flex-row')}>
         <div
             className={cn(
             'max-w-[75%] rounded-lg p-3 text-sm shadow-md',

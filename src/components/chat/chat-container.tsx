@@ -9,7 +9,6 @@ import { Input } from '../ui/input';
 import { WormGPTSolidLogo } from '../icons';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { SettingsDialog } from '../settings/settings-dialog';
-import type { VeniceOutput } from '@/lib/venice-types';
 import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
 
 const initialConversation: Conversation = {
@@ -19,7 +18,7 @@ const initialConversation: Conversation = {
         {
             id: 'initial',
             role: 'assistant',
-            content: "Welcome to WormGPT! I'm powered by OpenRouter. How can I help you today?",
+            content: "I'm WormGPT, created by Gwyn Literatus. How can I help you today?",
             audio: null,
         },
     ],
@@ -189,7 +188,7 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
                     <div className="flex items-center justify-between">
                          <div className="flex items-center gap-2">
                              <WormGPTSolidLogo className="h-7 w-7 text-primary" />
-                             <h2 className="text-lg font-semibold">Venice</h2>
+                             <h2 className="text-lg font-semibold">WormGPT</h2>
                          </div>
                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={startNewConversation}>
                             <PlusCircle />
@@ -260,9 +259,9 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
                         <SidebarMenuItem>
                              <div className="flex items-center gap-2 p-2">
                                 <Avatar className="h-8 w-8">
-                                    <AvatarFallback>S</AvatarFallback>
+                                    <AvatarFallback>G</AvatarFallback>
                                 </Avatar>
-                                <span className="text-sm font-medium">This Was Made By Stevee</span>
+                                <span className="text-sm font-medium">Gwyn Literatus</span>
                             </div>
                         </SidebarMenuItem>
                      </SidebarMenu>

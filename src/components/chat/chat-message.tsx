@@ -26,12 +26,14 @@ function CodeBlock({ language, code }: { language: string, code: string }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const displayLanguage = language === 'sh' ? 'shell' : language;
+
   return (
     <div className="my-2 rounded-md border bg-black text-sm text-white">
       <div className="flex items-center justify-between rounded-t-md bg-zinc-800 px-3 py-1.5">
         <div className="flex items-center gap-2">
             <Terminal className="h-4 w-4" />
-            <span className="font-mono text-xs">{language || 'code'}</span>
+            <span className="font-mono text-xs">{displayLanguage || 'code'}</span>
         </div>
         <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:bg-zinc-700 hover:text-white" onClick={handleCopy}>
           {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
@@ -61,7 +63,7 @@ function SimpleMarkdown({ content }: { content: string }) {
                 inCodeBlock = false;
             } else {
                 inCodeBlock = true;
-                codeBlockLang = line.substring(3).trim();
+                codeBlockLang = line.substring(3).trim().toLowerCase();
             }
         } else if (inCodeBlock) {
             codeBlockContent += line + '\n';

@@ -70,9 +70,13 @@ export function ChatContainer() {
     useEffect(() => {
         if (conversations.length > 0) {
             localStorage.setItem('conversations', JSON.stringify(conversations));
+        } else {
+            localStorage.removeItem('conversations');
         }
         if(activeConversationId) {
             localStorage.setItem('activeConversationId', activeConversationId);
+        } else {
+            localStorage.removeItem('activeConversationId');
         }
     }, [conversations, activeConversationId]);
     
@@ -128,21 +132,24 @@ export function ChatContainer() {
     };
     
     const handleDeleteConversation = (conversationId: string) => {
-        setConversations(prev => {
-            const newConversations = prev.filter(c => c.id !== conversationId);
+        const newConversations = conversations.filter(c => c.id !== conversationId);
+    
+        if (newConversations.length === 0) {
+            const newId = Date.now().toString();
+            const newConversation: Conversation = {
+                id: newId,
+                name: `New Chat`,
+                messages: [initialConversation.messages[0]],
+                createdAt: new Date().toISOString()
+            };
+            setConversations([newConversation]);
+            setActiveConversationId(newId);
+        } else {
+            setConversations(newConversations);
             if (activeConversationId === conversationId) {
-                if (newConversations.length > 0) {
-                    setActiveConversationId(newConversations[0].id);
-                } else {
-                     setActiveConversationId(null);
-                }
+                setActiveConversationId(newConversations[0].id);
             }
-            if (newConversations.length === 0) {
-                startNewConversation();
-                return []; 
-            }
-            return newConversations;
-        });
+        }
     };
     
     const handleRenameConversation = (conversationId: string) => {

@@ -34,7 +34,9 @@ function CodeBlock({ language, code }: { language: string, code: string }) {
           {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
         </Button>
       </div>
-      <pre className="overflow-x-auto p-3"><code className={`language-${language}`}>{code}</code></pre>
+      <div className="max-h-96 overflow-auto">
+        <pre className="p-3"><code className={`language-${language}`}>{code}</code></pre>
+      </div>
     </div>
   );
 }

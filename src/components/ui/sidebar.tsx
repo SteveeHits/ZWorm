@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
@@ -212,6 +212,7 @@ const Sidebar = React.forwardRef<
           >
              <div className="flex h-full flex-col">
               <SidebarHeader>
+                <SheetTitle className="sr-only">Primary Navigation</SheetTitle>
                 <Button variant="ghost" size="icon" className="h-7 w-7 self-end" onClick={() => setOpenMobile(false)}>
                   <PanelLeft />
                 </Button>
@@ -564,10 +565,13 @@ const SidebarMenuButton = React.forwardRef<
   ) => {
     const Comp = asChild ? Slot : "button"
     const { isMobile, state } = useSidebar()
+    
+    const { "data-sidebar": _, "data-size": __, ...rest } = props;
 
     const button = (
       <Comp
         ref={ref}
+        data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
         className={cn(
@@ -575,7 +579,7 @@ const SidebarMenuButton = React.forwardRef<
           state === "collapsed" && "justify-center !p-2",
           className
         )}
-        {...props}
+        {...rest}
       >
         {React.Children.map(children, (child, index) => {
           if (React.isValidElement(child) && index === 0) {

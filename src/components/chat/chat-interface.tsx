@@ -81,6 +81,8 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
     setIsLoading(false);
     setShowInfo(false);
   };
+  
+  const showWelcome = conversation.messages.length === 0;
 
   return (
     <div className="flex h-screen flex-col bg-background">
@@ -97,33 +99,39 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
         </div>
       </header>
       <main className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>
-          <div className="space-y-6 p-4 md:p-6">
-            {conversation.messages.map((message, index) => (
-              <ChatMessage 
-                key={message.id} 
-                {...message} 
-                onDelete={onMessageDelete}
-                isLastMessage={index === conversation.messages.length - 1} 
-              />
-            ))}
-            {isLoading && (
-              <div className="flex animate-fade-in items-start gap-4">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <Bot className="h-5 w-5" />
-                  </div>
-                  <div className="max-w-[75%] space-y-2 rounded-lg bg-muted p-3">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-4 w-48" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-              </div>
-            )}
-            {showInfo && <ChatInfoPanel />}
-          </div>
-          <ScrollBar orientation="vertical" />
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        {showWelcome ? (
+            <div className="h-full flex flex-col items-center justify-center">
+                <h2 className="text-3xl font-bold text-primary">Welcome User</h2>
+            </div>
+        ) : (
+            <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>
+                <div className="space-y-6 p-4 md:p-6">
+                    {conversation.messages.map((message, index) => (
+                    <ChatMessage 
+                        key={message.id} 
+                        {...message} 
+                        onDelete={onMessageDelete}
+                        isLastMessage={index === conversation.messages.length - 1} 
+                    />
+                    ))}
+                    {isLoading && (
+                    <div className="flex animate-fade-in items-start gap-4">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                            <Bot className="h-5 w-5" />
+                        </div>
+                        <div className="max-w-[75%] space-y-2 rounded-lg bg-muted p-3">
+                            <Skeleton className="h-4 w-32" />
+                            <Skeleton className="h-4 w-48" />
+                            <Skeleton className="h-4 w-24" />
+                        </div>
+                    </div>
+                    )}
+                    {showInfo && <ChatInfoPanel />}
+                </div>
+                <ScrollBar orientation="vertical" />
+                <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+        )}
       </main>
       <footer className="shrink-0 border-t border-border p-2 sm:p-4 bg-background">
         <form onSubmit={handleSubmit} className="flex items-center gap-2">

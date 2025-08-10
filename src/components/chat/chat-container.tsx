@@ -14,14 +14,7 @@ import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
 const initialConversation: Conversation = {
     id: '1',
     name: 'New Conversation',
-    messages: [
-        {
-            id: 'initial',
-            role: 'assistant',
-            content: "I'm WormGPT, created by Gwyn Literatus. How can I help you today?",
-            audio: null,
-        },
-    ],
+    messages: [],
     createdAt: new Date().toISOString()
 };
 
@@ -93,7 +86,7 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
         const newConversation: Conversation = {
             id: newId,
             name: `New Chat`,
-            messages: [initialConversation.messages[0]],
+            messages: [],
             createdAt: new Date().toISOString()
         };
         const newConversations = [newConversation, ...conversations];
@@ -109,7 +102,7 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
                 const newMessages = [...conv.messages, message];
                 const updatedConv = { ...conv, messages: newMessages, createdAt: new Date().toISOString() };
                 
-                if (conv.messages.length === 1 && conv.messages[0].id === 'initial' && message.role === 'user') {
+                if (conv.messages.length === 0 && message.role === 'user') {
                     const newName = message.content.split(' ').slice(0, 4).join(' ');
                     return { ...updatedConv, name: newName };
                 }
@@ -134,7 +127,7 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
     const handleClearConversation = (conversationId: string) => {
         setConversations(prev => prev.map(conv => {
             if (conv.id === conversationId) {
-                return { ...conv, messages: [initialConversation.messages[0]] };
+                return { ...conv, messages: [] };
             }
             return conv;
         }));
@@ -148,7 +141,7 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
             const newConversation: Conversation = {
                 id: newId,
                 name: `New Chat`,
-                messages: [initialConversation.messages[0]],
+                messages: [],
                 createdAt: new Date().toISOString()
             };
             setConversations([newConversation]);

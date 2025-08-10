@@ -9,6 +9,8 @@ import { Input } from '../ui/input';
 import { WormGPTSolidLogo } from '../icons';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { SettingsDialog } from '../settings/settings-dialog';
+import type { VeniceOutput } from '@/lib/venice-types';
+import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
 
 const initialConversation: Conversation = {
     id: '1',
@@ -36,8 +38,11 @@ const formatDate = (dateString: string) => {
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
+interface ChatContainerProps {
+    getVeniceResponse: typeof getVeniceResponseType;
+}
 
-export function ChatContainer() {
+export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
     const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
@@ -272,6 +277,7 @@ export function ChatContainer() {
                         onMessageAdd={handleAddMessage}
                         onConversationClear={handleClearConversation}
                         onMessageDelete={handleMessageDelete}
+                        getVeniceResponse={getVeniceResponse}
                     />
                 ) : (
                     <div className="flex flex-1 items-center justify-center">

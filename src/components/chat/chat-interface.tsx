@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Send, Trash2, Menu } from 'lucide-react';
-import { getVeniceResponse } from '@/app/actions';
 import { ChatMessage } from './chat-message';
 import { WormGPTSolidLogo } from '../icons';
 import { Skeleton } from '../ui/skeleton';
@@ -14,15 +13,17 @@ import type { Message, Conversation } from '@/lib/types';
 import { ChatInfoPanel } from './chat-info-panel';
 import { useSidebar } from '../ui/sidebar';
 import { useSettings } from '@/context/settings-context';
+import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
 
 interface ChatInterfaceProps {
   conversation: Conversation;
   onMessageAdd: (message: Message, isNew: boolean) => void;
   onConversationClear: (conversationId: string) => void;
   onMessageDelete: (messageId: string) => void;
+  getVeniceResponse: typeof getVeniceResponseType;
 }
 
-export function ChatInterface({ conversation, onMessageAdd, onConversationClear, onMessageDelete }: ChatInterfaceProps) {
+export function ChatInterface({ conversation, onMessageAdd, onConversationClear, onMessageDelete, getVeniceResponse }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
@@ -63,12 +64,16 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
     setInput('');
     setIsLoading(true);
 
-    const response = await getVeniceResponse(currentInput, settings.voiceMode, settings.voice);
+    const response = await getVeniceResponse({
+        prompt: currentInput,
+        withAudio: settings.voiceMode,
+        voice: settings.voice,
+    });
     
     const assistantMessage: Message = {
       id: Date.now().toString() + '-ai',
       role: 'assistant',
-      content: response.success ? response.message : "Sorry, something went wrong. Please try again.",
+      content: response.message || "Sorry, something went wrong. Please try again.",
       audio: response.audio
     };
     onMessageAdd(assistantMessage, true);

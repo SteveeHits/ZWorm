@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import type { Conversation, Message } from '@/lib/types';
@@ -180,7 +181,6 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
                 <SidebarHeader className="p-3">
                     <div className="flex items-center justify-between">
                          <div className="flex items-center gap-2">
-                             <WormGPTSolidLogo className="h-7 w-7 text-primary" />
                              <h2 className="text-lg font-semibold">WormGPT</h2>
                          </div>
                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={startNewConversation}>
@@ -274,7 +274,6 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
                 ) : (
                     <div className="flex flex-1 items-center justify-center">
                         <div className="text-center">
-                            <WormGPTSolidLogo className="mx-auto h-12 w-12" />
                             <p className="mt-2 text-lg">Select a conversation or start a new one.</p>
                         </div>
                     </div>

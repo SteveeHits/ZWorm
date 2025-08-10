@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -6,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Send, Trash2, Menu } from 'lucide-react';
 import { ChatMessage } from './chat-message';
-import { WormGPTSolidLogo } from '../icons';
 import { Skeleton } from '../ui/skeleton';
 import { Bot } from 'lucide-react';
 import type { Message, Conversation } from '@/lib/types';
@@ -90,7 +90,6 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
         <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
             <Menu className="h-5 w-5" />
         </Button>
-        <WormGPTSolidLogo className="h-8 w-8 text-primary" />
         <h1 className="text-xl font-bold tracking-tight">{conversation.name}</h1>
         <div className="ml-auto flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={() => onConversationClear(conversation.id)} aria-label="Clear conversation messages">
@@ -101,7 +100,7 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
       <main className="flex-1 overflow-hidden">
         {showWelcome ? (
             <div className="h-full flex flex-col items-center justify-center">
-                <h2 className="text-3xl font-bold text-primary">Welcome User</h2>
+                <h2 className="text-3xl font-bold">Welcome User</h2>
             </div>
         ) : (
             <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>

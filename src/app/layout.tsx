@@ -1,28 +1,14 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import { cn } from '@/lib/utils';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { SettingsProvider, useSettings } from '@/context/settings-context';
+import { SettingsProvider } from '@/context/settings-context';
+import { ThemedBody } from './themed-body';
 
 export const metadata: Metadata = {
   title: 'WormGPT',
   description: 'Chat with the WormGPT model.',
 };
-
-const ThemedBody = ({ children }: { children: React.ReactNode }) => {
-  const { theme } = useSettings();
-  
-  return (
-    <body className={cn(
-      "font-body antialiased",
-      `theme-${theme}`
-    )}>
-      {children}
-    </body>
-  );
-};
-
 
 export default function RootLayout({
   children,

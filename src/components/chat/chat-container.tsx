@@ -247,9 +247,6 @@ export function ChatContainer() {
                         </SidebarMenuItem>
                         <SidebarMenuItem>
                              <div className="flex items-center gap-2 p-2">
-                                <Avatar className="h-8 w-8">
-                                    <AvatarFallback>N</AvatarFallback>
-                                </Avatar>
                                 <span className="text-sm font-medium">This Was Made By Stevee</span>
                             </div>
                         </SidebarMenuItem>

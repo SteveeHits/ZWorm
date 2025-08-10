@@ -74,8 +74,8 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
   };
 
   return (
-    <div className="flex h-screen flex-col bg-transparent">
-       <header className="flex shrink-0 items-center gap-4 border-b px-4 py-3 sm:px-6 bg-background/80 backdrop-blur-sm">
+    <div className="flex h-screen flex-col bg-background">
+       <header className="flex shrink-0 items-center gap-4 border-b border-border px-4 py-3 sm:px-6">
         <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
             <Menu className="h-5 w-5" />
         </Button>
@@ -111,7 +111,7 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </main>
-      <footer className="shrink-0 border-t p-2 sm:p-4 bg-background/80 backdrop-blur-sm">
+      <footer className="shrink-0 border-t border-border p-2 sm:p-4 bg-background">
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <Input
             value={input}

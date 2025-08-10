@@ -2,12 +2,13 @@
 import { useState, useEffect } from 'react';
 import type { Conversation, Message } from '@/lib/types';
 import { ChatInterface } from './chat-interface';
-import { Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '../ui/sidebar';
+import { Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter } from '../ui/sidebar';
 import { Button } from '../ui/button';
-import { PlusCircle, MessageSquare, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, MessageSquare, Edit, Trash2, Settings, User } from 'lucide-react';
 import { Input } from '../ui/input';
 import { WormGPTSolidLogo } from '../icons';
 import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback } from '../ui/avatar';
 
 const initialConversation: Conversation = {
     id: '1',
@@ -21,6 +22,19 @@ const initialConversation: Conversation = {
     ],
     createdAt: new Date().toISOString()
 };
+
+const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
 
 export function ChatContainer() {
     const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -42,7 +56,6 @@ export function ChatContainer() {
                         setActiveConversationId(parsed[0].id);
                     }
                 } else {
-                    // Handle empty or invalid data
                     startNewConversation();
                 }
             } else {
@@ -67,7 +80,7 @@ export function ChatContainer() {
         const newId = Date.now().toString();
         const newConversation: Conversation = {
             id: newId,
-            name: `Conversation ${conversations.length + 1}`,
+            name: `New Chat`,
             messages: [initialConversation.messages[0]],
             createdAt: new Date().toISOString()
         };
@@ -81,13 +94,13 @@ export function ChatContainer() {
         setConversations(prev => prev.map(conv => {
             if (conv.id === activeConversationId) {
                 const newMessages = [...conv.messages, message];
+                const updatedConv = { ...conv, messages: newMessages, createdAt: new Date().toISOString() };
+                
                 if (conv.messages.length === 1 && conv.messages[0].id === 'initial' && message.role === 'user') {
-                    // This is the first user message in a new chat.
-                    // Set conversation name from the first 4 words of the message.
                     const newName = message.content.split(' ').slice(0, 4).join(' ');
-                    return { ...conv, name: newName, messages: newMessages };
+                    return { ...updatedConv, name: newName };
                 }
-                return { ...conv, messages: newMessages };
+                return updatedConv;
             }
             return conv;
         }));
@@ -98,7 +111,6 @@ export function ChatContainer() {
 
         setConversations(prev => prev.map(conv => {
             if (conv.id === activeConversationId) {
-                // Prevent deleting the initial welcome message
                 if (messageId === 'initial') return conv;
                 return { ...conv, messages: conv.messages.filter(m => m.id !== messageId) };
             }
@@ -122,16 +134,12 @@ export function ChatContainer() {
                 if (newConversations.length > 0) {
                     setActiveConversationId(newConversations[0].id);
                 } else {
-                    startNewConversation();
-                    // Since startNewConversation prepends, the activeId is set to the new one,
-                    // but we need to return an empty array and let the effect handle creating a new one if it's the last one.
-                    // Let's adjust logic.
                      setActiveConversationId(null);
                 }
             }
             if (newConversations.length === 0) {
                 startNewConversation();
-                return []; // will be repopulated by startNewConversation's effect
+                return []; 
             }
             return newConversations;
         });
@@ -154,57 +162,90 @@ export function ChatContainer() {
 
     const activeConversation = conversations.find(c => c.id === activeConversationId);
 
+    const sortedConversations = [...conversations].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
     return (
-        <div className="flex h-screen w-full animated-gradient">
+        <div className="flex h-screen w-full bg-background">
             <Sidebar>
-                <SidebarHeader>
-                    <Button variant="ghost" className="w-full justify-start gap-2" onClick={startNewConversation}>
-                        <PlusCircle className="h-4 w-4" />
-                        New Chat
-                    </Button>
+                <SidebarHeader className="p-3">
+                    <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-2">
+                             <WormGPTSolidLogo className="h-7 w-7 text-primary" />
+                             <h2 className="text-lg font-semibold">Venice</h2>
+                         </div>
+                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={startNewConversation}>
+                            <PlusCircle />
+                        </Button>
+                    </div>
                 </SidebarHeader>
                 <SidebarContent>
-                    <SidebarMenu>
-                        {conversations.map(conv => (
-                            <SidebarMenuItem key={conv.id}>
-                                {editingConversationId === conv.id ? (
-                                    <div className="flex w-full items-center gap-1 p-1">
-                                        <Input 
-                                            value={editingName} 
-                                            onChange={(e) => setEditingName(e.target.value)}
-                                            onKeyDown={(e) => e.key === 'Enter' && handleRenameConversation(conv.id)}
-                                            onBlur={() => handleRenameConversation(conv.id)}
-                                            autoFocus
-                                            className="h-7"
-                                        />
-                                    </div>
-                                ) : (
-                                    <SidebarMenuButton 
-                                        asChild
-                                        isActive={conv.id === activeConversationId}
-                                        tooltip={conv.name}
-                                        className="justify-between"
-                                    >
-                                        <div onClick={() => setActiveConversationId(conv.id)}>
-                                            <div className="flex items-center gap-2 truncate">
-                                                <MessageSquare />
-                                                <span className="truncate">{conv.name}</span>
+                    <div className="px-3 py-2">
+                        <Button variant="outline" className="w-full mb-4" onClick={startNewConversation}>
+                            <PlusCircle className="mr-2" />
+                            New Chat
+                        </Button>
+
+                        <h3 className="mb-2 px-1 text-xs font-semibold uppercase text-muted-foreground tracking-wider">
+                            Chat History
+                        </h3>
+                        <SidebarMenu>
+                            {sortedConversations.map(conv => (
+                                <SidebarMenuItem key={conv.id}>
+                                    {editingConversationId === conv.id ? (
+                                        <div className="flex w-full items-center gap-1 p-1">
+                                            <Input 
+                                                value={editingName} 
+                                                onChange={(e) => setEditingName(e.target.value)}
+                                                onKeyDown={(e) => e.key === 'Enter' && handleRenameConversation(conv.id)}
+                                                onBlur={() => handleRenameConversation(conv.id)}
+                                                autoFocus
+                                                className="h-7"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <SidebarMenuButton 
+                                            isActive={conv.id === activeConversationId}
+                                            tooltip={conv.name}
+                                            className="justify-between h-auto py-2 group"
+                                            onClick={() => setActiveConversationId(conv.id)}
+                                        >
+                                            <div className="flex items-center gap-2 w-full truncate">
+                                                <MessageSquare className="h-4 w-4" />
+                                                <span className="truncate font-medium flex-1">{conv.name}</span>
                                             </div>
-                                            <div className="flex items-center opacity-0 group-hover/menu-item:opacity-100 transition-opacity">
+                                            <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setEditingConversationId(conv.id); setEditingName(conv.name); }}>
                                                     <Edit className="h-3 w-3" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); handleDeleteConversation(conv.id)}}>
+                                                <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:text-red-400" onClick={(e) => { e.stopPropagation(); handleDeleteConversation(conv.id)}}>
                                                     <Trash2 className="h-3 w-3" />
                                                 </Button>
                                             </div>
-                                        </div>
-                                    </SidebarMenuButton>
-                                )}
-                            </SidebarMenuItem>
-                        ))}
-                    </SidebarMenu>
+                                        </SidebarMenuButton>
+                                    )}
+                                </SidebarMenuItem>
+                            ))}
+                        </SidebarMenu>
+                    </div>
                 </SidebarContent>
+                <SidebarFooter className="p-3 border-t border-sidebar-border">
+                     <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton>
+                                <Settings />
+                                Settings
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        <SidebarMenuItem>
+                             <div className="flex items-center gap-2 p-2">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarFallback>N</AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm font-medium">This Was Made By Stevee</span>
+                            </div>
+                        </SidebarMenuItem>
+                     </SidebarMenu>
+                </SidebarFooter>
             </Sidebar>
 
             <div className="flex-1 flex flex-col">

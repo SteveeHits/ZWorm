@@ -25,7 +25,7 @@ export function ChatInterface() {
 
   useEffect(() => {
     const fetchInitialMessage = async () => {
-      const response = await getVeniceResponse();
+      const response = await getVeniceResponse("initial");
       if (response.success) {
         setMessages([
           {
@@ -61,10 +61,11 @@ export function ChatInterface() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = input;
     setInput('');
     setIsLoading(true);
 
-    const response = await getVeniceResponse();
+    const response = await getVeniceResponse(currentInput);
     
     const assistantMessage: Message = {
       id: Date.now().toString() + '-ai',
@@ -80,7 +81,7 @@ export function ChatInterface() {
     <div className="flex h-screen flex-col bg-background">
       <header className="flex shrink-0 items-center gap-4 border-b px-4 py-3 sm:px-6">
         <VeniceLogo className="h-8 w-8 text-primary" />
-        <h1 className="text-xl font-bold tracking-tight">VeniceAI Chat</h1>
+        <h1 className="text-xl font-bold tracking-tight">Venice AI</h1>
       </header>
       <main className="flex-1 overflow-hidden">
         <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>

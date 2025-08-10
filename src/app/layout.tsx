@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'VeniceAI Chat',
+  title: 'Venice AI',
   description: 'Chat with the Venice AI model.',
 };
 

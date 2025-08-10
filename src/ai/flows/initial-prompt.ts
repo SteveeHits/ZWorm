@@ -54,6 +54,9 @@ const initialPrompt = ai.definePrompt({
   Start with "Welcome to Venice AI! Here are some prompts to get you started:"
   `,
   output: {schema: InitialPromptOutputSchema},
+  config: {
+    model: 'googleai/gemini-pro',
+  },
 });
 
 /**

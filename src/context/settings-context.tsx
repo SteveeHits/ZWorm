@@ -21,7 +21,7 @@ interface Settings {
 
 interface SettingsContextType {
   settings: Settings;
-  setSettings: (settings: Partial<Settings>) => void;
+  setSettings: (settings: Partial<Settings> | ((s: Settings) => Settings)) => void;
   toggleFullscreen: () => void;
   isMounted: boolean;
 }
@@ -32,8 +32,8 @@ const defaultSettings: Settings = {
   theme: 'violet',
   voiceMode: false,
   fullscreen: false,
-  backgroundColor: 'hsl(240 10% 3.9%)',
-  textColor: 'hsl(210 40% 98%)',
+  backgroundColor: '#0a0a0a',
+  textColor: '#fafafa',
   useGradient: false,
   gradientFrom: '#1e1b4b',
   gradientTo: '#1e293b',
@@ -71,8 +71,12 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  const setSettings = (newSettings: Partial<Settings>) => {
-    setSettingsState(prev => ({ ...prev, ...newSettings }));
+  const setSettings = (newSettings: Partial<Settings>| ((s: Settings) => Settings)) => {
+     if (typeof newSettings === 'function') {
+      setSettingsState(newSettings);
+    } else {
+      setSettingsState(prev => ({ ...prev, ...newSettings }));
+    }
   };
 
   const toggleFullscreen = useCallback(() => {

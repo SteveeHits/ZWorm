@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { useSettings } from '@/context/settings-context';
 import { Check, Palette, Maximize, SlidersHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
 
 interface SettingsDialogProps {
@@ -76,17 +75,6 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                                     ))}
                                 </div>
                             </div>
-                            
-                            <div className='space-y-2'>
-                                <Label>Background Color</Label>
-                                <Input type="color" value={localSettings.backgroundColor} onChange={(e) => setLocalSettings(s => ({...s, backgroundColor: e.target.value}))} className="w-full" />
-                            </div>
-
-                            <div className='space-y-2'>
-                                <Label>Text Color</Label>
-                                <Input type="color" value={localSettings.textColor} onChange={(e) => setLocalSettings(s => ({...s, textColor: e.target.value}))} className="w-full" />
-                            </div>
-
                         </div>
                         
                          <div className="space-y-4">

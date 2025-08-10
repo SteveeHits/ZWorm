@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Send, Trash2, Menu } from 'lucide-react';
+import { Send, Trash2, Menu, Square } from 'lucide-react';
 import { ChatMessage } from './chat-message';
 import { Skeleton } from '../ui/skeleton';
 import { Bot } from 'lucide-react';
@@ -29,6 +29,7 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
   const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
   const [showInfo, setShowInfo] = useState(false);
   const { toggleSidebar } = useSidebar();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
 
   useEffect(() => {
@@ -41,9 +42,21 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
     setInput(e.target.value);
   };
 
+  const stopGenerating = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim()) return;
+    if (isLoading) {
+      stopGenerating();
+      return;
+    }
 
     if (input.trim().toLowerCase() === 'info_check') {
         setShowInfo(prev => !prev);
@@ -62,17 +75,23 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
     setInput('');
     setIsLoading(true);
 
+    abortControllerRef.current = new AbortController();
+
     const response = await getVeniceResponse(
         currentInput,
+        abortControllerRef.current.signal
     );
     
-    const assistantMessage: Message = {
-      id: Date.now().toString() + '-ai',
-      role: 'assistant',
-      content: response.message || "Sorry, something went wrong. Please try again.",
-    };
-    onMessageAdd(assistantMessage, true);
+    if (abortControllerRef.current && !abortControllerRef.current.signal.aborted) {
+        const assistantMessage: Message = {
+          id: Date.now().toString() + '-ai',
+          role: 'assistant',
+          content: response.message || "Sorry, something went wrong. Please try again.",
+        };
+        onMessageAdd(assistantMessage, true);
+    }
     
+    abortControllerRef.current = null;
     setIsLoading(false);
     setShowInfo(false);
   };
@@ -128,16 +147,23 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
         )}
       </main>
       <footer className="shrink-0 border-t border-border p-2 sm:p-4 bg-background">
+        {isLoading && (
+          <div className="flex justify-center p-2">
+            <Button variant="outline" onClick={stopGenerating}>
+              <Square className="mr-2 h-4 w-4" />
+              Stop generating
+            </Button>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <Input
             value={input}
             onChange={handleInputChange}
             placeholder="Ask WormGPT..."
             className="flex-1"
-            disabled={isLoading}
             autoComplete="off"
           />
-          <Button type="submit" disabled={isLoading} size="icon" aria-label="Send message">
+          <Button type="submit" size="icon" aria-label="Send message">
             <Send className="h-4 w-4" />
           </Button>
         </form>

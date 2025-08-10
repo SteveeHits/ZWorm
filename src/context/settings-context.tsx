@@ -7,8 +7,6 @@ type Theme = 'zinc' | 'slate' | 'stone' | 'gray' | 'neutral' | 'red' | 'rose' | 
 interface Settings {
   theme: Theme;
   fullscreen: boolean;
-  backgroundColor: string;
-  textColor: string;
 }
 
 interface SettingsContextType {
@@ -23,8 +21,6 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 const defaultSettings: Settings = {
   theme: 'violet',
   fullscreen: false,
-  backgroundColor: '0 0% 3.9%',
-  textColor: '0 0% 98%',
 };
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {

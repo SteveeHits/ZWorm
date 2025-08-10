@@ -3,15 +3,16 @@
 
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bot, User, Copy, Check, Terminal, Link as LinkIcon, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Bot, User, Copy, Check, Terminal, Link as LinkIcon, MoreHorizontal, Trash2, Volume2 } from 'lucide-react';
 import { Button } from '../ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 interface ChatMessageProps {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  audio: string | null;
   onDelete: (id: string) => void;
 }
 
@@ -89,9 +90,16 @@ function SimpleMarkdown({ content }: { content: string }) {
     return <div className="space-y-2">{elements}</div>;
 }
 
-export function ChatMessage({ id, role, content, onDelete }: ChatMessageProps) {
+export function ChatMessage({ id, role, content, audio, onDelete }: ChatMessageProps) {
   const isUser = role === 'user';
   const [copied, setCopied] = useState(false);
+  const audioRef = React.useRef<HTMLAudioElement>(null);
+  
+  useEffect(() => {
+    if (audio && audioRef.current) {
+        audioRef.current.play().catch(e => console.error("Audio playback failed", e));
+    }
+  }, [audio]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content);
@@ -113,6 +121,12 @@ export function ChatMessage({ id, role, content, onDelete }: ChatMessageProps) {
                 {copied ? <Check className="mr-2 h-4 w-4 text-green-500" /> : <Copy className="mr-2 h-4 w-4" />}
                 Copy
             </DropdownMenuItem>
+            {!isUser && audio && (
+                <DropdownMenuItem onClick={() => audioRef.current?.play()}>
+                    <Volume2 className="mr-2 h-4 w-4" />
+                    Play Audio
+                </DropdownMenuItem>
+            )}
             {canBeDeleted && (
                 <DropdownMenuItem onClick={() => onDelete(id)} className="text-red-500 focus:text-red-500">
                     <Trash2 className="mr-2 h-4 w-4" />
@@ -130,6 +144,7 @@ export function ChatMessage({ id, role, content, onDelete }: ChatMessageProps) {
         isUser ? 'justify-end' : 'justify-start'
       )}
     >
+      {audio && <audio ref={audioRef} src={audio} className="hidden" />}
       {!isUser && (
         <Avatar className="h-8 w-8 shrink-0 bg-primary text-primary-foreground">
           <AvatarFallback>

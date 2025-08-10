@@ -4,11 +4,11 @@ import type { Conversation, Message } from '@/lib/types';
 import { ChatInterface } from './chat-interface';
 import { Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter } from '../ui/sidebar';
 import { Button } from '../ui/button';
-import { PlusCircle, MessageSquare, Edit, Trash2, Settings, User } from 'lucide-react';
+import { PlusCircle, MessageSquare, Edit, Trash2, Settings } from 'lucide-react';
 import { Input } from '../ui/input';
 import { WormGPTSolidLogo } from '../icons';
-import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '../ui/avatar';
+import { SettingsDialog } from '../settings/settings-dialog';
 
 const initialConversation: Conversation = {
     id: '1',
@@ -18,6 +18,7 @@ const initialConversation: Conversation = {
             id: 'initial',
             role: 'assistant',
             content: "Welcome to WormGPT! I'm powered by OpenRouter. How can I help you today?",
+            audio: null,
         },
     ],
     createdAt: new Date().toISOString()
@@ -41,6 +42,7 @@ export function ChatContainer() {
     const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
     const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
     const [editingName, setEditingName] = useState('');
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     useEffect(() => {
         try {
@@ -173,6 +175,7 @@ export function ChatContainer() {
 
     return (
         <div className="flex h-screen w-full bg-background">
+             <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
             <Sidebar>
                 <SidebarHeader className="p-3">
                     <div className="flex items-center justify-between">
@@ -221,6 +224,7 @@ export function ChatContainer() {
                                                     <MessageSquare className="h-4 w-4" />
                                                     <span className="truncate font-medium flex-1">{conv.name}</span>
                                                 </div>
+                                                <span className="text-xs text-muted-foreground">{formatDate(conv.createdAt)}</span>
                                             </SidebarMenuButton>
                                             <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setEditingConversationId(conv.id); setEditingName(conv.name); }}>
@@ -240,13 +244,16 @@ export function ChatContainer() {
                 <SidebarFooter className="p-3 border-t border-sidebar-border">
                      <SidebarMenu>
                         <SidebarMenuItem>
-                            <SidebarMenuButton>
+                            <SidebarMenuButton onClick={() => setIsSettingsOpen(true)}>
                                 <Settings />
                                 Settings
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                         <SidebarMenuItem>
                              <div className="flex items-center gap-2 p-2">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarFallback>S</AvatarFallback>
+                                </Avatar>
                                 <span className="text-sm font-medium">This Was Made By Stevee</span>
                             </div>
                         </SidebarMenuItem>

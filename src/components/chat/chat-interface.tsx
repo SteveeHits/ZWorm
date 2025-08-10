@@ -13,6 +13,7 @@ import { Bot } from 'lucide-react';
 import type { Message, Conversation } from '@/lib/types';
 import { ChatInfoPanel } from './chat-info-panel';
 import { useSidebar } from '../ui/sidebar';
+import { useSettings } from '@/context/settings-context';
 
 interface ChatInterfaceProps {
   conversation: Conversation;
@@ -27,6 +28,7 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
   const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
   const [showInfo, setShowInfo] = useState(false);
   const { toggleSidebar } = useSidebar();
+  const { settings } = useSettings();
 
 
   useEffect(() => {
@@ -53,6 +55,7 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
       id: Date.now().toString(),
       role: 'user',
       content: input,
+      audio: null
     };
 
     onMessageAdd(userMessage);
@@ -60,12 +63,13 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
     setInput('');
     setIsLoading(true);
 
-    const response = await getVeniceResponse(currentInput);
+    const response = await getVeniceResponse(currentInput, settings.voiceMode);
     
     const assistantMessage: Message = {
       id: Date.now().toString() + '-ai',
       role: 'assistant',
       content: response.success ? response.message : "Sorry, something went wrong. Please try again.",
+      audio: response.audio
     };
     onMessageAdd(assistantMessage);
     

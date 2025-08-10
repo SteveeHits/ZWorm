@@ -200,9 +200,8 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
             placeholder="Ask WormGPT..."
             className="flex-1"
             autoComplete="off"
-            disabled={isLoading}
           />
-          <Button type="submit" size="icon" aria-label="Send message" disabled={isLoading}>
+          <Button type="submit" size="icon" aria-label="Send message" disabled={isLoading && !input.trim()}>
             <Send className="h-4 w-4" />
           </Button>
         </form>

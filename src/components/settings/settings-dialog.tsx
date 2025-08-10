@@ -6,12 +6,17 @@ import { Label } from '@/components/ui/label';
 import { useSettings } from '@/context/settings-context';
 import { Palette, Maximize, SlidersHorizontal } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
-import { Switch } from '../ui/switch';
+import { cn } from '@/lib/utils';
 
 interface SettingsDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
+
+const themes = [
+    { name: 'default', label: 'Default' },
+    { name: 'theme-red', label: 'Red' },
+];
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     const { settings, setSettings, toggleFullscreen } = useSettings();
@@ -40,13 +45,19 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                         
                         <div className="space-y-4">
                             <h3 className="text-lg font-medium flex items-center gap-2"><Palette className="h-5 w-5" /> Appearance</h3>
-                            <div className="flex items-center justify-between rounded-lg border p-3">
-                                <Label htmlFor="animations-enabled" className="flex items-center gap-2">Enable Animations</Label>
-                                <Switch
-                                    id="animations-enabled"
-                                    checked={localSettings.animationsEnabled}
-                                    onCheckedChange={(checked) => setLocalSettings(s => ({...s, animationsEnabled: checked }))}
-                                />
+                            <div className="space-y-2">
+                                <Label>Theme</Label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {themes.map((theme) => (
+                                        <Button
+                                            key={theme.name}
+                                            variant={localSettings.theme === theme.name ? 'default' : 'outline'}
+                                            onClick={() => setLocalSettings(s => ({ ...s, theme: theme.name }))}
+                                        >
+                                            {theme.label}
+                                        </Button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                         

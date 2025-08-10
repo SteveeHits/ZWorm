@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode, useCallback 
 
 interface Settings {
   fullscreen: boolean;
-  animationsEnabled: boolean;
+  theme: string;
 }
 
 interface SettingsContextType {
@@ -18,7 +18,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 
 const defaultSettings: Settings = {
   fullscreen: false,
-  animationsEnabled: true,
+  theme: 'default',
 };
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {

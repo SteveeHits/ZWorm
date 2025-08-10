@@ -14,8 +14,8 @@ body {
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 100% 50%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
     --secondary: 0 0% 15.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 15.9%;
@@ -26,7 +26,7 @@ body {
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 15.9%;
     --input: 0 0% 15.9%;
-    --ring: 0 100% 50%;
+    --ring: 0 0% 98%;
     --radius: 0.5rem;
     --chart-1: 262 84% 58%;
     --chart-2: 160 60% 45%;
@@ -37,9 +37,9 @@ body {
     --sidebar-background: 0 0% 3.9%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 15.9%;
-    --sidebar-accent: 0 100% 50%;
+    --sidebar-accent: 0 0% 15.9%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-ring: 0 100% 50%;
+    --sidebar-ring: 0 0% 98%;
   }
 
   .dark {
@@ -49,8 +49,8 @@ body {
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 100% 50%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
     --secondary: 0 0% 15.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 15.9%;
@@ -61,7 +61,7 @@ body {
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 15.9%;
     --input: 0 0% 15.9%;
-    --ring: 0 100% 50%;
+    --ring: 0 0% 98%;
     --chart-1: 262 84% 58%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -71,9 +71,18 @@ body {
     --sidebar-background: 0 0% 3.9%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 15.9%;
-    --sidebar-accent: 0 100% 50%;
+    --sidebar-accent: 0 0% 15.9%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-ring: 0 100% 50%;
+    --sidebar-ring: 0 0% 98%;
+  }
+
+  .theme-red {
+    --primary: 0 72% 51%; /* Red */
+    --primary-foreground: 0 86% 97%;
+    --ring: 0 72% 51%;
+    --sidebar-accent: 0 72% 51%;
+    --sidebar-accent-foreground: 0 86% 97%;
+    --sidebar-ring: 0 72% 51%;
   }
 }
 

@@ -35,7 +35,7 @@ function CodeBlock({ language, code }: { language: string, code: string }) {
         </Button>
       </div>
       <div className="max-h-96 overflow-auto">
-        <pre className="p-3"><code className={`language-${language}`}>{code}</code></pre>
+        <pre className="p-3 overflow-x-auto"><code className={`language-${language}`}>{code}</code></pre>
       </div>
     </div>
   );
@@ -140,7 +140,7 @@ export function ChatMessage({ id, role, content, onDelete }: ChatMessageProps) {
       <div className={cn("flex items-start gap-1", isUser ? 'flex-row-reverse' : 'flex-row')}>
         <div
             className={cn(
-            'max-w-[75%] rounded-lg p-3 text-sm shadow-md',
+            'max-w-[75vw] sm:max-w-md md:max-w-lg lg:max-w-2xl rounded-lg p-3 text-sm shadow-md',
             isUser
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-muted text-muted-foreground'

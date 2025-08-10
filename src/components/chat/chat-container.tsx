@@ -203,17 +203,19 @@ export function ChatContainer() {
                                             />
                                         </div>
                                     ) : (
-                                        <SidebarMenuButton 
-                                            isActive={conv.id === activeConversationId}
-                                            tooltip={conv.name}
-                                            className="justify-between h-auto py-2 group"
-                                            onClick={() => setActiveConversationId(conv.id)}
-                                        >
-                                            <div className="flex items-center gap-2 w-full truncate">
-                                                <MessageSquare className="h-4 w-4" />
-                                                <span className="truncate font-medium flex-1">{conv.name}</span>
-                                            </div>
-                                            <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="relative group">
+                                            <SidebarMenuButton 
+                                                isActive={conv.id === activeConversationId}
+                                                tooltip={conv.name}
+                                                className="justify-between h-auto py-2 w-full"
+                                                onClick={() => setActiveConversationId(conv.id)}
+                                            >
+                                                <div className="flex items-center gap-2 w-full truncate">
+                                                    <MessageSquare className="h-4 w-4" />
+                                                    <span className="truncate font-medium flex-1">{conv.name}</span>
+                                                </div>
+                                            </SidebarMenuButton>
+                                            <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setEditingConversationId(conv.id); setEditingName(conv.name); }}>
                                                     <Edit className="h-3 w-3" />
                                                 </Button>
@@ -221,7 +223,7 @@ export function ChatContainer() {
                                                     <Trash2 className="h-3 w-3" />
                                                 </Button>
                                             </div>
-                                        </SidebarMenuButton>
+                                        </div>
                                     )}
                                 </SidebarMenuItem>
                             ))}

@@ -10,7 +10,7 @@ export const ThemedBody = ({ children }: { children: React.ReactNode }) => {
     <body 
       className={cn(
         "font-body antialiased",
-        `theme-${settings.theme}`
+        settings.animationsEnabled && "animations-enabled"
       )}
     >
       {children}

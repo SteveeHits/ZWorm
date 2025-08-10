@@ -8,14 +8,14 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 3.9%;
+    --background: 0 0% 10.2%;
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 262.1 83.3% 57.8%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 0 100% 50%;
+    --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 15.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 15.9%;
@@ -26,7 +26,7 @@ body {
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 15.9%;
     --input: 0 0% 15.9%;
-    --ring: 262.1 83.3% 57.8%;
+    --ring: 0 100% 50%;
     --radius: 0.5rem;
     --chart-1: 262 84% 58%;
     --chart-2: 160 60% 45%;
@@ -37,20 +37,20 @@ body {
     --sidebar-background: 0 0% 3.9%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 15.9%;
-    --sidebar-accent: 262.1 83.3% 57.8%;
+    --sidebar-accent: 0 100% 50%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-ring: 262.1 83.3% 57.8%;
+    --sidebar-ring: 0 100% 50%;
   }
 
   .dark {
-    --background: 0 0% 3.9%;
+    --background: 0 0% 10.2%;
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 262.1 83.3% 57.8%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 0 100% 50%;
+    --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 15.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 15.9%;
@@ -61,7 +61,7 @@ body {
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 15.9%;
     --input: 0 0% 15.9%;
-    --ring: 262.1 83.3% 57.8%;
+    --ring: 0 100% 50%;
     --chart-1: 262 84% 58%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -71,23 +71,10 @@ body {
     --sidebar-background: 0 0% 3.9%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 15.9%;
-    --sidebar-accent: 262.1 83.3% 57.8%;
+    --sidebar-accent: 0 100% 50%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-ring: 262.1 83.3% 57.8%;
+    --sidebar-ring: 0 100% 50%;
   }
-
-  .theme-zinc { --primary: 240 5.9% 50%; --primary-foreground: 240 5.9% 98%; }
-  .theme-slate { --primary: 215.2 79.2% 51.2%; --primary-foreground: 210 40% 98%; }
-  .theme-stone { --primary: 25 5.3% 44.7%; --primary-foreground: 24 9.8% 10%; }
-  .theme-gray { --primary: 220 8.9% 46.1%; --primary-foreground: 210 40% 98%; }
-  .theme-neutral { --primary: 0 0% 45.1%; --primary-foreground: 0 0% 98%; }
-  .theme-red { --primary: 0 72.2% 50.6%; --primary-foreground: 0 85.7% 97.3%; }
-  .theme-rose { --primary: 346.8 77.2% 49.8%; --primary-foreground: 355.7 100% 97.3%; }
-  .theme-orange { --primary: 24.6 95% 53.1%; --primary-foreground: 20.5 90.2% 48.2%; }
-  .theme-green { --primary: 142.1 76.2% 36.3%; --primary-foreground: 144.9 80.4% 97.3%; }
-  .theme-blue { --primary: 221.2 83.2% 53.3%; --primary-foreground: 210 40% 98%; }
-  .theme-yellow { --primary: 47.9 95.8% 53.1%; --primary-foreground: 26 83.3% 14.1%; }
-  .theme-violet { --primary: 262.1 83.3% 57.8%; --primary-foreground: 210 40% 98%; }
 }
 
 @layer base {
@@ -98,7 +85,17 @@ body {
     @apply bg-background text-foreground;
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+  }
+
+  .animations-enabled {
+    --animation-duration: 0.2s;
     transition: background-color 0.5s ease, color 0.5s ease;
+  }
+  
+  .animations-enabled * {
+      transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, transform;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-duration: var(--animation-duration);
   }
 }
 

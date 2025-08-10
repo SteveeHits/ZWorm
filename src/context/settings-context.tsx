@@ -2,11 +2,9 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 
-type Theme = 'zinc' | 'slate' | 'stone' | 'gray' | 'neutral' | 'red' | 'rose' | 'orange' | 'green' | 'blue' | 'yellow' | 'violet';
-
 interface Settings {
-  theme: Theme;
   fullscreen: boolean;
+  animationsEnabled: boolean;
 }
 
 interface SettingsContextType {
@@ -19,8 +17,8 @@ interface SettingsContextType {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 const defaultSettings: Settings = {
-  theme: 'violet',
   fullscreen: false,
+  animationsEnabled: true,
 };
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
@@ -32,7 +30,8 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     try {
       const storedSettings = localStorage.getItem('app-settings');
       if (storedSettings) {
-        setSettingsState(prev => ({ ...prev, ...JSON.parse(storedSettings) }));
+        const parsedSettings = JSON.parse(storedSettings);
+        setSettingsState(prev => ({ ...prev, ...parsedSettings }));
       }
     } catch (error) {
       console.error('Failed to parse settings from localStorage', error);

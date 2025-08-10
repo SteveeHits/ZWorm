@@ -95,9 +95,8 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
         setActiveConversationId(newId);
     };
 
-    const handleAddMessage = (message: Message, isNew: boolean) => {
+    const handleAddMessage = (message: Message) => {
         if (!activeConversationId) return;
-        setLastMessageIsNew(isNew);
         setConversations(prev => prev.map(conv => {
             if (conv.id === activeConversationId) {
                 const newMessages = [...conv.messages, message];

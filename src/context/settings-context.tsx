@@ -16,6 +16,7 @@ interface SettingsContextType {
   toggleVoiceMode: () => void;
   toggleFullscreen: () => void;
   setSettings: (settings: Partial<Settings>) => void;
+  isMounted: boolean;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -27,22 +28,26 @@ const defaultSettings: Settings = {
 };
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
-  const [settings, setSettingsState] = useState<Settings>(() => {
-    if (typeof window === 'undefined') {
-      return defaultSettings;
-    }
-    try {
-      const storedSettings = localStorage.getItem('app-settings');
-      return storedSettings ? JSON.parse(storedSettings) : defaultSettings;
-    } catch (error) {
-      console.error('Failed to parse settings from localStorage', error);
-      return defaultSettings;
-    }
-  });
+  const [isMounted, setIsMounted] = useState(false);
+  const [settings, setSettingsState] = useState<Settings>(defaultSettings);
 
   useEffect(() => {
-    localStorage.setItem('app-settings', JSON.stringify(settings));
-  }, [settings]);
+    setIsMounted(true);
+    try {
+      const storedSettings = localStorage.getItem('app-settings');
+      if (storedSettings) {
+        setSettingsState(JSON.parse(storedSettings));
+      }
+    } catch (error) {
+      console.error('Failed to parse settings from localStorage', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+        localStorage.setItem('app-settings', JSON.stringify(settings));
+    }
+  }, [settings, isMounted]);
   
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -76,7 +81,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
 
 
   return (
-    <SettingsContext.Provider value={{ settings, setTheme, toggleVoiceMode, toggleFullscreen, setSettings }}>
+    <SettingsContext.Provider value={{ settings, setTheme, toggleVoiceMode, toggleFullscreen, setSettings, isMounted }}>
       {children}
     </SettingsContext.Provider>
   );

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Battery, ChargingStation, Clock, Calendar } from 'lucide-react';
+import { Battery, Plug, Clock, Calendar } from 'lucide-react';
 
 export function ChatInfoPanel() {
   const [batteryStatus, setBatteryStatus] = useState({ level: 0, charging: false });
@@ -62,7 +62,7 @@ export function ChatInfoPanel() {
           <span>{batteryStatus.level}%</span>
         </div>
         <div className="flex items-center gap-2">
-          <ChargingStation className="h-5 w-5 text-primary" />
+          <Plug className="h-5 w-5 text-primary" />
           <span>{batteryStatus.charging ? 'Yes' : 'No'}</span>
         </div>
       </CardContent>

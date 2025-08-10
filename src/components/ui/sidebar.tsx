@@ -565,33 +565,43 @@ const SidebarMenuButton = React.forwardRef<
     const Comp = asChild ? Slot : "button"
     const { isMobile, state } = useSidebar()
 
-    const buttonContent = (
-      <>
-        {React.Children.map(children, (child, index) => {
-          if (React.isValidElement(child) && index === 0) { // Icon
-            return React.cloneElement(child, { className: cn('size-4 shrink-0', child.props.className) });
-          }
-          if (typeof child === 'string' || (React.isValidElement(child) && child.type === 'span')) { // Text or span
-            return <div className={cn("truncate transition-opacity duration-300", state === 'collapsed' && 'opacity-0 w-0')}>{child}</div>;
-          }
-          return child;
-        })}
-      </>
-    );
-
     const button = (
       <Comp
         ref={ref}
         data-size={size}
         data-active={isActive}
         className={cn(
-          sidebarMenuButtonVariants({ variant, size }), 
-          state === 'collapsed' && 'justify-center !p-2',
+          sidebarMenuButtonVariants({ variant, size }),
+          state === "collapsed" && "justify-center !p-2",
           className
         )}
         {...props}
       >
-        {buttonContent}
+        {React.Children.map(children, (child, index) => {
+          if (React.isValidElement(child) && index === 0) {
+            // Icon
+            return React.cloneElement(child, {
+              className: cn("size-4 shrink-0", child.props.className),
+            })
+          }
+          if (
+            typeof child === "string" ||
+            (React.isValidElement(child) && child.type === "span")
+          ) {
+            // Text or span
+            return (
+              <div
+                className={cn(
+                  "truncate transition-opacity duration-300",
+                  state === "collapsed" && "w-0 opacity-0"
+                )}
+              >
+                {child}
+              </div>
+            )
+          }
+          return child
+        })}
       </Comp>
     )
 

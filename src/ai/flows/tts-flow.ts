@@ -8,6 +8,12 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import wav from 'wav';
+import type { Voice } from '@/context/settings-context';
+
+const TextToSpeechInputSchema = z.object({
+  text: z.string(),
+  voice: z.string() as z.ZodType<Voice>,
+});
 
 async function toWav(
   pcmData: Buffer,
@@ -39,17 +45,17 @@ async function toWav(
 const textToSpeechFlow = ai.defineFlow(
   {
     name: 'textToSpeechFlow',
-    inputSchema: z.string(),
+    inputSchema: TextToSpeechInputSchema,
     outputSchema: z.string(),
   },
-  async (text) => {
+  async ({ text, voice }) => {
     const { media } = await ai.generate({
       model: 'googleai/gemini-2.5-flash-preview-tts',
       config: {
         responseModalities: ['AUDIO'],
         speechConfig: {
           voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Algenib' },
+            prebuiltVoiceConfig: { voiceName: voice },
           },
         },
       },
@@ -66,6 +72,6 @@ const textToSpeechFlow = ai.defineFlow(
   }
 );
 
-export async function textToSpeech(text: string): Promise<string> {
-    return textToSpeechFlow(text);
+export async function textToSpeech(text: string, voice: Voice): Promise<string> {
+    return textToSpeechFlow({ text, voice });
 }

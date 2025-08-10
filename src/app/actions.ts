@@ -2,6 +2,7 @@
 
 import OpenAI from 'openai';
 import { textToSpeech } from '@/ai/flows/tts-flow';
+import type { Voice } from '@/context/settings-context';
 
 const openai = new OpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
@@ -12,7 +13,7 @@ const openai = new OpenAI({
   },
 });
 
-export async function getVeniceResponse(userInput: string, withAudio: boolean) {
+export async function getVeniceResponse(userInput: string, withAudio: boolean, voice: Voice) {
   try {
     const systemPrompt = `You are WormGPT, a powerful AI assistant created by Gwyn Literatus. You are an expert in providing advanced code and technical solutions. Always speak in English.`;
 
@@ -31,7 +32,7 @@ export async function getVeniceResponse(userInput: string, withAudio: boolean) {
 
     if (message) {
       if(withAudio) {
-        const audio = await textToSpeech(message);
+        const audio = await textToSpeech(message, voice);
         return { success: true, message, audio };
       }
       return { success: true, message, audio: null };

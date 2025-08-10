@@ -15,6 +15,7 @@ interface ChatMessageProps {
   content: string;
   audio: string | null;
   onDelete: (id: string) => void;
+  isLastMessage: boolean;
 }
 
 function CodeBlock({ language, code }: { language: string, code: string }) {
@@ -91,16 +92,16 @@ function SimpleMarkdown({ content }: { content: string }) {
     return <div className="space-y-2">{elements}</div>;
 }
 
-export function ChatMessage({ id, role, content, audio, onDelete }: ChatMessageProps) {
+export function ChatMessage({ id, role, content, audio, onDelete, isLastMessage }: ChatMessageProps) {
   const isUser = role === 'user';
   const [copied, setCopied] = useState(false);
   const audioRef = React.useRef<HTMLAudioElement>(null);
   
   useEffect(() => {
-    if (audio && audioRef.current) {
+    if (isLastMessage && audio && audioRef.current) {
         audioRef.current.play().catch(e => console.error("Audio playback failed", e));
     }
-  }, [audio]);
+  }, [audio, isLastMessage]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content);

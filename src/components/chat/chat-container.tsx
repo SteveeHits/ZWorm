@@ -43,6 +43,8 @@ export function ChatContainer() {
     const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
     const [editingName, setEditingName] = useState('');
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [lastMessageIsNew, setLastMessageIsNew] = useState(false);
+
 
     useEffect(() => {
         try {
@@ -95,8 +97,9 @@ export function ChatContainer() {
         setActiveConversationId(newId);
     };
 
-    const handleAddMessage = (message: Message) => {
+    const handleAddMessage = (message: Message, isNew: boolean) => {
         if (!activeConversationId) return;
+        setLastMessageIsNew(isNew);
         setConversations(prev => prev.map(conv => {
             if (conv.id === activeConversationId) {
                 const newMessages = [...conv.messages, message];

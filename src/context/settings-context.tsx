@@ -3,19 +3,26 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 
 type Theme = 'zinc' | 'slate' | 'stone' | 'gray' | 'neutral' | 'red' | 'rose' | 'orange' | 'green' | 'blue' | 'yellow' | 'violet';
+type Animation = 'none' | 'wave' | 'glow' | 'pulse';
+export type Voice = 'Algenib' | 'Achernar' | 'Spica' | 'Antares' | 'Arcturus' | 'Canopus';
 
 interface Settings {
   theme: Theme;
   voiceMode: boolean;
   fullscreen: boolean;
+  backgroundColor: string;
+  textColor: string;
+  useGradient: boolean;
+  gradientFrom: string;
+  gradientTo: string;
+  animation: Animation;
+  voice: Voice;
 }
 
 interface SettingsContextType {
   settings: Settings;
-  setTheme: (theme: Theme) => void;
-  toggleVoiceMode: () => void;
-  toggleFullscreen: () => void;
   setSettings: (settings: Partial<Settings>) => void;
+  toggleFullscreen: () => void;
   isMounted: boolean;
 }
 
@@ -25,6 +32,13 @@ const defaultSettings: Settings = {
   theme: 'violet',
   voiceMode: false,
   fullscreen: false,
+  backgroundColor: 'hsl(240 10% 3.9%)',
+  textColor: 'hsl(210 40% 98%)',
+  useGradient: false,
+  gradientFrom: '#1e1b4b',
+  gradientTo: '#1e293b',
+  animation: 'none',
+  voice: 'Algenib',
 };
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
@@ -36,7 +50,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     try {
       const storedSettings = localStorage.getItem('app-settings');
       if (storedSettings) {
-        setSettingsState(JSON.parse(storedSettings));
+        setSettingsState(prev => ({ ...prev, ...JSON.parse(storedSettings) }));
       }
     } catch (error) {
       console.error('Failed to parse settings from localStorage', error);
@@ -61,14 +75,6 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     setSettingsState(prev => ({ ...prev, ...newSettings }));
   };
 
-  const setTheme = (theme: Theme) => {
-    setSettings({ theme });
-  };
-
-  const toggleVoiceMode = () => {
-    setSettings({ voiceMode: !settings.voiceMode });
-  };
-
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(err => {
@@ -81,7 +87,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
 
 
   return (
-    <SettingsContext.Provider value={{ settings, setTheme, toggleVoiceMode, toggleFullscreen, setSettings, isMounted }}>
+    <SettingsContext.Provider value={{ settings, setSettings, toggleFullscreen, isMounted }}>
       {children}
     </SettingsContext.Provider>
   );

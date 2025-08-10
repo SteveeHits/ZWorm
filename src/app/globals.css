@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes gradient-wave {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes background-glow {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes background-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -39,6 +56,9 @@ body {
     --sidebar-accent: 262.1 83.3% 57.8%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-ring: 262.1 83.3% 57.8%;
+    
+    --gradient-from: #1e1b4b;
+    --gradient-to: #1e293b;
   }
 
   .dark {
@@ -74,7 +94,7 @@ body {
     --sidebar-ring: 262.1 83.3% 57.8%;
   }
 
-  .theme-zinc { --primary: 240 5.9% 10%; --primary-foreground: 240 5.9% 98%; }
+  .theme-zinc { --primary: 240 5.9% 50%; --primary-foreground: 240 5.9% 98%; }
   .theme-slate { --primary: 215.2 79.2% 51.2%; --primary-foreground: 210 40% 98%; }
   .theme-stone { --primary: 25 5.3% 44.7%; --primary-foreground: 24 9.8% 10%; }
   .theme-gray { --primary: 220 8.9% 46.1%; --primary-foreground: 210 40% 98%; }
@@ -94,6 +114,24 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
+  
+  body.use-gradient {
+    background: linear-gradient(135deg, var(--gradient-from), var(--gradient-to));
+    background-size: 400% 400%;
+  }
+
+  body.animation-wave {
+    animation: gradient-wave 15s ease infinite;
+  }
+  
+  body.animation-glow {
+    animation: background-glow 8s ease-in-out infinite;
+  }
+
+  body.animation-pulse {
+    animation: background-pulse 10s ease-in-out infinite;
   }
 }
 

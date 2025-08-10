@@ -17,7 +17,7 @@ import { useSettings } from '@/context/settings-context';
 
 interface ChatInterfaceProps {
   conversation: Conversation;
-  onMessageAdd: (message: Message) => void;
+  onMessageAdd: (message: Message, isNew: boolean) => void;
   onConversationClear: (conversationId: string) => void;
   onMessageDelete: (messageId: string) => void;
 }
@@ -58,12 +58,12 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
       audio: null
     };
 
-    onMessageAdd(userMessage);
+    onMessageAdd(userMessage, true);
     const currentInput = input;
     setInput('');
     setIsLoading(true);
 
-    const response = await getVeniceResponse(currentInput, settings.voiceMode);
+    const response = await getVeniceResponse(currentInput, settings.voiceMode, settings.voice);
     
     const assistantMessage: Message = {
       id: Date.now().toString() + '-ai',
@@ -71,7 +71,7 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
       content: response.success ? response.message : "Sorry, something went wrong. Please try again.",
       audio: response.audio
     };
-    onMessageAdd(assistantMessage);
+    onMessageAdd(assistantMessage, true);
     
     setIsLoading(false);
     setShowInfo(false);
@@ -94,8 +94,13 @@ export function ChatInterface({ conversation, onMessageAdd, onConversationClear,
       <main className="flex-1 overflow-hidden">
         <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>
           <div className="space-y-6 p-4 md:p-6">
-            {conversation.messages.map((message) => (
-              <ChatMessage key={message.id} {...message} onDelete={onMessageDelete} />
+            {conversation.messages.map((message, index) => (
+              <ChatMessage 
+                key={message.id} 
+                {...message} 
+                onDelete={onMessageDelete}
+                isLastMessage={index === conversation.messages.length - 1} 
+              />
             ))}
             {isLoading && (
               <div className="flex animate-fade-in items-start gap-4">

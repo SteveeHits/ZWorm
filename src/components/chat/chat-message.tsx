@@ -43,7 +43,7 @@ function CodeBlock({ language, code }: { language: string, code: string }) {
 
 function SimpleMarkdown({ content }: { content: string }) {
     const lines = content.split('\n');
-    const elements = [];
+    const elements: JSX.Element[] = [];
     let inCodeBlock = false;
     let codeBlockContent = '';
     let codeBlockLang = '';
@@ -52,7 +52,7 @@ function SimpleMarkdown({ content }: { content: string }) {
         const line = lines[i];
         if (line.trim().startsWith("```")) {
             if (inCodeBlock) {
-                elements.push(<CodeBlock key={elements.length} language={codeBlockLang} code={codeBlockContent.trim()} />);
+                elements.push(<CodeBlock key={`code-${elements.length}`} language={codeBlockLang} code={codeBlockContent.trim()} />);
                 codeBlockContent = '';
                 codeBlockLang = '';
                 inCodeBlock = false;
@@ -65,12 +65,12 @@ function SimpleMarkdown({ content }: { content: string }) {
         } else {
             const parts = line.split(/(\[.*?\]\(.*?\))/g);
             elements.push(
-                <p key={i} className="leading-relaxed">
+                <p key={`p-${elements.length}`} className="leading-relaxed">
                     {parts.map((part, j) => {
                         const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
                         if (linkMatch) {
                             return (
-                                <a key={j} href={linkMatch[2]} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-accent underline hover:text-accent/80">
+                                <a key={j} href={linkMatch[2]} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:text-primary/80">
                                     {linkMatch[1]}
                                     <LinkIcon className="h-3 w-3" />
                                 </a>
@@ -83,7 +83,7 @@ function SimpleMarkdown({ content }: { content: string }) {
         }
     }
      if (inCodeBlock) {
-        elements.push(<CodeBlock key={elements.length} language={codeBlockLang} code={codeBlockContent.trim()} />);
+        elements.push(<CodeBlock key={`code-${elements.length}`} language={codeBlockLang} code={codeBlockContent.trim()} />);
     }
 
     return <div className="space-y-2">{elements}</div>;

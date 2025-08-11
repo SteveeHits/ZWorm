@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bot, User, Copy, Check, Terminal, Link as LinkIcon, MoreHorizontal, Trash2, Volume2 } from 'lucide-react';
+import { Bot, User, Copy, Check, Terminal, Link as LinkIcon, MoreHorizontal, Trash2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useState } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
@@ -95,6 +95,37 @@ function SimpleMarkdown({ content }: { content: string }) {
     return <div className="space-y-2">{elements}</div>;
 }
 
+interface MessageActionsProps {
+  isUser: boolean;
+  canBeDeleted: boolean;
+  onCopy: () => void;
+  onDelete: () => void;
+  copied: boolean;
+}
+
+const MessageActions = ({ isUser, canBeDeleted, onCopy, onDelete, copied }: MessageActionsProps) => (
+  <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
+              <MoreHorizontal className="h-4 w-4" />
+          </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align={isUser ? "end" : "start"}>
+          <DropdownMenuItem onClick={onCopy}>
+              {copied ? <Check className="mr-2 h-4 w-4 text-green-500" /> : <Copy className="mr-2 h-4 w-4" />}
+              Copy
+          </DropdownMenuItem>
+          {canBeDeleted && (
+              <DropdownMenuItem onClick={onDelete} className="text-red-500 focus:text-red-500">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+              </DropdownMenuItem>
+          )}
+      </DropdownMenuContent>
+  </DropdownMenu>
+);
+
+
 export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStreaming, isLoading }: ChatMessageProps) {
   const isUser = role === 'user';
   const [copied, setCopied] = useState(false);
@@ -106,28 +137,6 @@ export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStre
   };
   
   const canBeDeleted = id !== 'initial';
-
-  const MessageActions = () => (
-    <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                <MoreHorizontal className="h-4 w-4" />
-            </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align={isUser ? "end" : "start"}>
-            <DropdownMenuItem onClick={handleCopy}>
-                {copied ? <Check className="mr-2 h-4 w-4 text-green-500" /> : <Copy className="mr-2 h-4 w-4" />}
-                Copy
-            </DropdownMenuItem>
-            {canBeDeleted && (
-                <DropdownMenuItem onClick={() => onDelete(id)} className="text-red-500 focus:text-red-500">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                </DropdownMenuItem>
-            )}
-        </DropdownMenuContent>
-    </DropdownMenu>
-  );
 
   return (
     <div
@@ -160,7 +169,13 @@ export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStre
             )}
             {isStreaming && content.length > 0 && <span className="animate-pulse">▍</span>}
         </div>
-        <MessageActions />
+        <MessageActions 
+          isUser={isUser}
+          canBeDeleted={canBeDeleted}
+          onCopy={handleCopy}
+          onDelete={() => onDelete(id)}
+          copied={copied}
+        />
       </div>
       {isUser && (
         <Avatar className="h-8 w-8 shrink-0">

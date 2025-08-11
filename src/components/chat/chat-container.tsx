@@ -112,6 +112,21 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
         setLastMessageIsNew(isNew);
     };
 
+    const handleUpdateMessage = (messageId: string, newContent: string) => {
+        if (!activeConversationId) return;
+        setConversations(prev => prev.map(conv => {
+            if (conv.id === activeConversationId) {
+                return { 
+                    ...conv, 
+                    messages: conv.messages.map(m => 
+                        m.id === messageId ? { ...m, content: newContent } : m
+                    ) 
+                };
+            }
+            return conv;
+        }));
+    };
+
     const handleMessageDelete = (messageId: string) => {
         if (!activeConversationId) return;
 
@@ -266,6 +281,7 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
                         key={activeConversation.id}
                         conversation={activeConversation}
                         onMessageAdd={handleAddMessage}
+                        onMessageUpdate={handleUpdateMessage}
                         onConversationClear={handleClearConversation}
                         onMessageDelete={handleMessageDelete}
                         getVeniceResponse={getVeniceResponse}

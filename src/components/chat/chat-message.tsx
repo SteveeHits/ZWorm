@@ -15,6 +15,7 @@ interface ChatMessageProps {
   content: string;
   onDelete: (id: string) => void;
   isLastMessage: boolean;
+  isStreaming?: boolean;
 }
 
 function CodeBlock({ language, code }: { language: string, code: string }) {
@@ -93,7 +94,7 @@ function SimpleMarkdown({ content }: { content: string }) {
     return <div className="space-y-2">{elements}</div>;
 }
 
-export function ChatMessage({ id, role, content, onDelete, isLastMessage }: ChatMessageProps) {
+export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStreaming }: ChatMessageProps) {
   const isUser = role === 'user';
   const [copied, setCopied] = useState(false);
 
@@ -151,6 +152,12 @@ export function ChatMessage({ id, role, content, onDelete, isLastMessage }: Chat
             )}
         >
             {isUser ? content : <SimpleMarkdown content={content} />}
+            {isStreaming && content.length === 0 && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="animate-pulse">...</span>
+                </div>
+            )}
+            {isStreaming && content.length > 0 && <span className="animate-pulse">▍</span>}
         </div>
         <MessageActions />
       </div>

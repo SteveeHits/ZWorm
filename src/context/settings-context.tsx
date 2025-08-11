@@ -7,7 +7,6 @@ interface Settings {
   fullscreen: boolean;
   theme: string;
   voiceModeEnabled: boolean;
-  selectedVoice: string;
 }
 
 interface SettingsContextType {
@@ -23,7 +22,6 @@ const defaultSettings: Settings = {
   fullscreen: false,
   theme: 'default',
   voiceModeEnabled: false,
-  selectedVoice: 'Algenib',
 };
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {

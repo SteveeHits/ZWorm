@@ -21,13 +21,6 @@ const themes = [
     { name: 'theme-red', label: 'Red' },
 ];
 
-const voices = [
-    { name: 'Algenib', label: 'Female 1' },
-    { name: 'Vega', label: 'Female 2' },
-    { name: 'Achernar', label: 'Male 1' },
-    { name: 'Sirius', label: 'Male 2' },
-];
-
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     const { settings, setSettings, toggleFullscreen } = useSettings();
     const [localSettings, setLocalSettings] = useState(settings);
@@ -80,23 +73,6 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                                     checked={localSettings.voiceModeEnabled}
                                     onCheckedChange={(checked) => setLocalSettings(s => ({...s, voiceModeEnabled: checked}))}
                                 />
-                            </div>
-                             <div className="space-y-2">
-                                <Label>Voice</Label>
-                                <Select
-                                    value={localSettings.selectedVoice}
-                                    onValueChange={(value) => setLocalSettings(s => ({...s, selectedVoice: value}))}
-                                    disabled={!localSettings.voiceModeEnabled}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a voice" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {voices.map(voice => (
-                                            <SelectItem key={voice.name} value={voice.name}>{voice.label}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
                             </div>
                         </div>
                         

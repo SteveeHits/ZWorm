@@ -1,3 +1,4 @@
+
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
@@ -5,6 +6,8 @@ import { createContext, useContext, useState, useEffect, ReactNode, useCallback 
 interface Settings {
   fullscreen: boolean;
   theme: string;
+  voiceModeEnabled: boolean;
+  selectedVoice: string;
 }
 
 interface SettingsContextType {
@@ -19,6 +22,8 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 const defaultSettings: Settings = {
   fullscreen: false,
   theme: 'default',
+  voiceModeEnabled: false,
+  selectedVoice: 'Algenib',
 };
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {

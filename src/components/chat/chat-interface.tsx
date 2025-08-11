@@ -13,7 +13,8 @@ import type { Message, Conversation } from '@/lib/types';
 import { ChatInfoPanel } from './chat-info-panel';
 import { useSidebar } from '../ui/sidebar';
 import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
-import { getOpenRouterConfig } from '@/app/actions';
+import { useSettings } from '@/context/settings-context';
+import { textToSpeech } from '@/ai/flows/tts-flow';
 
 
 interface ChatInterfaceProps {
@@ -33,6 +34,18 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
   const [showInfo, setShowInfo] = useState(false);
   const { toggleSidebar } = useSidebar();
   const abortControllerRef = useRef<AbortController | null>(null);
+  const { settings } = useSettings();
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.src = audioUrl || '';
+      if(audioUrl) {
+          audioRef.current.play().catch(e => console.error("Audio playback failed", e));
+      }
+    }
+  }, [audioUrl]);
 
 
   useEffect(() => {
@@ -67,6 +80,7 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input.trim()) return;
+    setAudioUrl(null);
 
     if (isLoading) {
       stopGenerating();
@@ -85,8 +99,6 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
       content: input,
     };
     
-    const newMessages: Message[] = [...conversation.messages, userMessage];
-
     onMessageAdd(userMessage, true);
     setInput('');
     setIsLoading(true);
@@ -99,8 +111,25 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
     }, true);
 
     try {
-        const result = await getVeniceResponse(newMessages);
-        onMessageUpdate(assistantMessageId, result.message);
+        const stream = await getVeniceResponse([...conversation.messages, userMessage]);
+        const reader = stream.getReader();
+        const decoder = new TextDecoder();
+        let accumulatedResponse = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            accumulatedResponse += chunk;
+            onMessageUpdate(assistantMessageId, accumulatedResponse);
+        }
+
+        if (settings.voiceModeEnabled) {
+            const ttsResponse = await textToSpeech({ text: accumulatedResponse, voice: settings.selectedVoice });
+            if (ttsResponse?.media) {
+                setAudioUrl(ttsResponse.media);
+            }
+        }
     } catch (error: any) {
         if (error.name !== 'AbortError') {
             const errorMessage = `Sorry, I am having trouble connecting to the AI. Error: ${error.message}`;
@@ -175,6 +204,7 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
             </Button>
           )}
         </form>
+         <audio ref={audioRef} className="hidden" />
       </footer>
     </div>
   );

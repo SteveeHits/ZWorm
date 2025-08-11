@@ -1,12 +1,15 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useSettings } from '@/context/settings-context';
-import { Palette, Maximize, SlidersHorizontal } from 'lucide-react';
+import { Palette, Maximize, SlidersHorizontal, Mic } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { Switch } from '../ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 interface SettingsDialogProps {
     open: boolean;
@@ -16,6 +19,13 @@ interface SettingsDialogProps {
 const themes = [
     { name: 'default', label: 'Default' },
     { name: 'theme-red', label: 'Red' },
+];
+
+const voices = [
+    { name: 'Algenib', label: 'Female 1' },
+    { name: 'Vega', label: 'Female 2' },
+    { name: 'Achernar', label: 'Male 1' },
+    { name: 'Sirius', label: 'Male 2' },
 ];
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
@@ -58,6 +68,35 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                                         </Button>
                                     ))}
                                 </div>
+                            </div>
+                        </div>
+
+                         <div className="space-y-4">
+                            <h3 className="text-lg font-medium flex items-center gap-2"><Mic className="h-5 w-5" /> Voice Settings</h3>
+                            <div className="flex items-center justify-between rounded-lg border p-3">
+                                <Label htmlFor="voice-mode" className="flex items-center gap-2">Voice Mode</Label>
+                                <Switch
+                                    id="voice-mode"
+                                    checked={localSettings.voiceModeEnabled}
+                                    onCheckedChange={(checked) => setLocalSettings(s => ({...s, voiceModeEnabled: checked}))}
+                                />
+                            </div>
+                             <div className="space-y-2">
+                                <Label>Voice</Label>
+                                <Select
+                                    value={localSettings.selectedVoice}
+                                    onValueChange={(value) => setLocalSettings(s => ({...s, selectedVoice: value}))}
+                                    disabled={!localSettings.voiceModeEnabled}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a voice" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {voices.map(voice => (
+                                            <SelectItem key={voice.name} value={voice.name}>{voice.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                         

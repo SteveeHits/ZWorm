@@ -143,10 +143,11 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
                         onDelete={onMessageDelete}
                         isLastMessage={index === conversation.messages.length - 1 && lastMessageIsNew} 
                         isStreaming={isLoading && index === conversation.messages.length - 1}
+                        isLoading={isLoading && index === conversation.messages.length - 1}
                     />
                     ))}
                     {isLoading && conversation.messages[conversation.messages.length -1].role === 'user' && (
-                       <ChatMessage id="loading" role="assistant" content="" onDelete={() => {}} isLastMessage={true} isStreaming={true} />
+                       <ChatMessage id="loading" role="assistant" content="" onDelete={() => {}} isLastMessage={true} isStreaming={true} isLoading={true} />
                     )}
                     {showInfo && <ChatInfoPanel />}
                 </div>

@@ -16,6 +16,7 @@ interface ChatMessageProps {
   onDelete: (id: string) => void;
   isLastMessage: boolean;
   isStreaming?: boolean;
+  isLoading?: boolean;
 }
 
 function CodeBlock({ language, code }: { language: string, code: string }) {
@@ -94,7 +95,7 @@ function SimpleMarkdown({ content }: { content: string }) {
     return <div className="space-y-2">{elements}</div>;
 }
 
-export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStreaming }: ChatMessageProps) {
+export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStreaming, isLoading }: ChatMessageProps) {
   const isUser = role === 'user';
   const [copied, setCopied] = useState(false);
 

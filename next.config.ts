@@ -20,4 +20,8 @@ const nextConfig: NextConfig = {
   },
 };
 
+// Set the default max duration for serverless functions
+// This is to prevent timeouts on long-running AI requests
+export const maxDuration = 300;
+
 export default nextConfig;

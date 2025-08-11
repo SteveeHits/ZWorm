@@ -163,7 +163,6 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
             placeholder="Ask WormGPT..."
             className="flex-1"
             autoComplete="off"
-            disabled={isLoading}
           />
           {isLoading ? (
             <Button type="button" variant="outline" size="icon" onClick={stopGenerating} aria-label="Stop generating">

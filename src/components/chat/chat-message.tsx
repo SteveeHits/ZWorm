@@ -152,9 +152,9 @@ export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStre
             )}
         >
             {isUser ? content : <SimpleMarkdown content={content} />}
-            {isStreaming && content.length === 0 && (
+            {isLoading && content.length === 0 && (
                 <div className="flex items-center gap-2 text-muted-foreground">
-                    <span className="animate-pulse">...</span>
+                    <span className="animate-pulse">Thinking...</span>
                 </div>
             )}
             {isStreaming && content.length > 0 && <span className="animate-pulse">▍</span>}

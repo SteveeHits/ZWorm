@@ -1,8 +1,9 @@
 
 'use server';
 
-import { analyzeFile } from '@/ai/flows/analyze-file-flow';
+import { analyzeFileFlow } from '@/ai/flows/analyze-file-flow';
 import type { Message } from '@/lib/types';
+import type { AnalyzeFileOutput } from '@/ai/flows/analyze-file-flow';
 
 interface VeniceOutput {
   message: string;
@@ -81,16 +82,16 @@ export async function getVeniceResponse(
   return stream;
 }
 
-export async function getFileAnalysis(fileDataUri: string, fileName: string) {
-  'use server';
+export async function getFileAnalysis(fileDataUri: string, fileName: string): Promise<AnalyzeFileOutput> {
   try {
-    const analysis = await analyzeFile({
+    const analysis = await analyzeFileFlow({
       fileDataUri,
       fileName,
     });
     return analysis;
   } catch (error) {
     console.error('Error analyzing file:', error);
+    // Ensure the returned object matches the AnalyzeFileOutput type
     return {
       description: `An error occurred while analyzing the file: ${error instanceof Error ? error.message : String(error)}. Please try again.`,
       fileType: 'error',

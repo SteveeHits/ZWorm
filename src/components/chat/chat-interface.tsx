@@ -12,7 +12,8 @@ import { Bot } from 'lucide-react';
 import type { Message, Conversation } from '@/lib/types';
 import { ChatInfoPanel } from './chat-info-panel';
 import { useSidebar } from '../ui/sidebar';
-import type { getVeniceResponse as getVeniceResponseType, getFileAnalysis as getFileAnalysisType } from '@/app/actions';
+import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
+import { getFileAnalysis } from '@/app/actions';
 import { useSettings } from '@/context/settings-context';
 import { textToSpeech } from '@/ai/flows/tts-flow';
 import { InfoDialog } from './info-dialog';
@@ -27,7 +28,6 @@ interface ChatInterfaceProps {
   onConversationClear: (conversationId: string) => void;
   onMessageDelete: (messageId: string) => void;
   getVeniceResponse: typeof getVeniceResponseType;
-  getFileAnalysis: typeof getFileAnalysisType;
   lastMessageIsNew: boolean;
 }
 
@@ -38,7 +38,6 @@ export function ChatInterface({
   onConversationClear, 
   onMessageDelete, 
   getVeniceResponse, 
-  getFileAnalysis,
   lastMessageIsNew 
 }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
@@ -114,6 +113,7 @@ export function ChatInterface({
       reader.onload = async (event) => {
         const fileDataUri = event.target?.result as string;
         if (fileDataUri) {
+          // The getFileAnalysis function is now a direct server action call
           const analysis = await getFileAnalysis(fileDataUri, file.name);
           
           if(analysis.fileType === 'error') {

@@ -1,17 +1,18 @@
 
-'use server';
 /**
  * @fileOverview A flow for analyzing uploaded files using a generative AI model.
  *
- * - analyzeFile - A function that takes file data and returns an analysis.
- * - AnalyzeFileInput - The input type for the analyzeFile function.
- * - AnalyzeFileOutput - The return type for the analyzeFile function.
+ * - analyzeFileFlow - A function that takes file data and returns an analysis.
+ * - AnalyzeFileInputSchema - The input schema for the analyzeFileFlow function.
+ *   (not exported to prevent 'use server' issues)
+ * - AnalyzeFileOutputSchema - The output schema for the analyzeFileFlow function.
+ *   (not exported to prevent 'use server' issues)
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const AnalyzeFileInputSchema = z.object({
+const AnalyzeFileInputSchema = z.object({
   fileDataUri: z
     .string()
     .describe(
@@ -21,7 +22,7 @@ export const AnalyzeFileInputSchema = z.object({
 });
 export type AnalyzeFileInput = z.infer<typeof AnalyzeFileInputSchema>;
 
-export const AnalyzeFileOutputSchema = z.object({
+const AnalyzeFileOutputSchema = z.object({
   description: z.string().describe('A detailed description of the file content.'),
   fileType: z.string().describe("The identified type of the file (e.g., 'image', 'text', 'code', 'unknown')."),
 });
@@ -58,8 +59,3 @@ export const analyzeFileFlow = ai.defineFlow(
     return output!;
   }
 );
-
-
-export async function analyzeFile(input: AnalyzeFileInput): Promise<AnalyzeFileOutput> {
-  return analyzeFileFlow(input);
-}

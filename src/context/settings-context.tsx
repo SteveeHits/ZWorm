@@ -23,7 +23,7 @@ const defaultSettings: Settings = {
   fullscreen: false,
   theme: 'default',
   voiceModeEnabled: false,
-  voice: 'Algenib',
+  voice: 'algenib',
 };
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {

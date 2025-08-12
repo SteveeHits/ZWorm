@@ -13,7 +13,10 @@ import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'genkit';
 import wav from 'wav';
 
-const TextToSpeechInputSchema = z.string().describe('The text to be converted to speech.');
+const TextToSpeechInputSchema = z.object({
+  text: z.string().describe('The text to be converted to speech.'),
+  voice: z.string().describe('The voice to use for the speech synthesis.'),
+});
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
 
 const TextToSpeechOutputSchema = z.object({
@@ -54,14 +57,14 @@ const textToSpeechFlow = ai.defineFlow(
     inputSchema: TextToSpeechInputSchema,
     outputSchema: TextToSpeechOutputSchema,
   },
-  async (text) => {
+  async ({ text, voice }) => {
     const { media } = await ai.generate({
       model: googleAI.model('gemini-2.5-flash-preview-tts'),
       config: {
         responseModalities: ['AUDIO'],
         speechConfig: {
           voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Algenib' }, // Hardcoded voice
+            prebuiltVoiceConfig: { voiceName: voice },
           },
         },
       },

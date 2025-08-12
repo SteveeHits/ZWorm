@@ -21,6 +21,13 @@ const themes = [
     { name: 'theme-red', label: 'Red' },
 ];
 
+const voices = [
+    { name: 'Algenib', label: 'Algenib (Female)' },
+    { name: 'Achernar', label: 'Achernar (Male)' },
+    { name: 'Hadar', label: 'Hadar (Female)' },
+    { name: 'Rigel', label: 'Rigel (Male)' },
+];
+
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     const { settings, setSettings, toggleFullscreen } = useSettings();
     const [localSettings, setLocalSettings] = useState(settings);
@@ -73,6 +80,25 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                                     checked={localSettings.voiceModeEnabled}
                                     onCheckedChange={(checked) => setLocalSettings(s => ({...s, voiceModeEnabled: checked}))}
                                 />
+                            </div>
+                             <div className="space-y-2">
+                                <Label>Voice</Label>
+                                 <Select
+                                     value={localSettings.voice}
+                                     onValueChange={(value) => setLocalSettings(s => ({ ...s, voice: value }))}
+                                     disabled={!localSettings.voiceModeEnabled}
+                                 >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a voice" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {voices.map((voice) => (
+                                            <SelectItem key={voice.name} value={voice.name}>
+                                                {voice.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                         

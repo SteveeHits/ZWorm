@@ -125,7 +125,7 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
         }
 
         if (settings.voiceModeEnabled) {
-            const ttsResponse = await textToSpeech(accumulatedResponse);
+            const ttsResponse = await textToSpeech({ text: accumulatedResponse, voice: settings.voice });
             if (ttsResponse?.media) {
                 setAudioUrl(ttsResponse.media);
             }

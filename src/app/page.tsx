@@ -1,6 +1,7 @@
+
 import { ChatContainer } from '@/components/chat/chat-container';
-import { getVeniceResponse } from './actions';
+import { getVeniceResponse, getFileAnalysis } from './actions';
 
 export default function Home() {
-  return <ChatContainer getVeniceResponse={getVeniceResponse} />;
+  return <ChatContainer getVeniceResponse={getVeniceResponse} getFileAnalysis={getFileAnalysis} />;
 }

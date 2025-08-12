@@ -4,10 +4,11 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bot, User, Copy, Check, Terminal, Link as LinkIcon, MoreHorizontal, Trash2, Paperclip } from 'lucide-react';
+import { Bot, User, Copy, Check, Terminal, Link as LinkIcon, MoreHorizontal, Trash2, Paperclip, File as FileIcon } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useState } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import Image from 'next/image';
 
 interface ChatMessageProps {
   id: string;
@@ -49,10 +50,35 @@ function CodeBlock({ language, code }: { language: string, code: string }) {
 
 function SimpleMarkdown({ content }: { content: string }) {
     const lines = content.split('\n');
-    const elements: JSX.Element[] = [];
+    const elements: (JSX.Element | string)[] = [];
     let inCodeBlock = false;
     let codeBlockContent = '';
     let codeBlockLang = '';
+
+    const renderParagraph = (line: string, key: string) => {
+        const parts = line.split(/(\[.*?\]\(.*?\))/g);
+        return (
+             <p key={key} className="leading-relaxed">
+                {parts.map((part, j) => {
+                    const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
+                    if (linkMatch) {
+                        return (
+                            <a key={j} href={linkMatch[2]} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:text-primary/80">
+                                {linkMatch[1]}
+                                <LinkIcon className="h-3 w-3" />
+                            </a>
+                        );
+                    }
+                     const boldMatch = part.match(/\*\*(.*?)\*\*/);
+                    if (boldMatch) {
+                        return <strong key={j}>{boldMatch[1]}</strong>
+                    }
+                    return part;
+                })}
+            </p>
+        )
+    };
+
 
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -69,23 +95,7 @@ function SimpleMarkdown({ content }: { content: string }) {
         } else if (inCodeBlock) {
             codeBlockContent += line + '\n';
         } else {
-            const parts = line.split(/(\[.*?\]\(.*?\))/g);
-            elements.push(
-                <p key={`p-${elements.length}`} className="leading-relaxed">
-                    {parts.map((part, j) => {
-                        const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
-                        if (linkMatch) {
-                            return (
-                                <a key={j} href={linkMatch[2]} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:text-primary/80">
-                                    {linkMatch[1]}
-                                    <LinkIcon className="h-3 w-3" />
-                                </a>
-                            );
-                        }
-                        return part;
-                    })}
-                </p>
-            );
+            elements.push(renderParagraph(line, `p-${elements.length}`));
         }
     }
      if (inCodeBlock) {
@@ -129,7 +139,14 @@ const MessageActions = ({ isUser, canBeDeleted, onCopy, onDelete, copied }: Mess
 export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStreaming, isLoading }: ChatMessageProps) {
   const isUser = role === 'user';
   const isContextMessage = content.startsWith('[CONTEXT]');
-  const displayContent = isContextMessage ? content.substring(9) : content;
+  const isFileMessage = content.startsWith('[FILE:');
+  
+  let displayContent = content;
+  if(isContextMessage) displayContent = content.substring(9);
+  if(isFileMessage) displayContent = content.substring(content.indexOf(']') + 1, content.length);
+  if(isFileMessage && !displayContent) displayContent = content.substring(6, content.length-1);
+
+
   
   const [copied, setCopied] = useState(false);
 
@@ -140,12 +157,16 @@ export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStre
   };
   
   const canBeDeleted = id !== 'initial';
+  
+  const isImageFile = (content: string) => {
+    return content.startsWith('data:image');
+  }
 
   if (isContextMessage) {
     return (
       <div className="group flex items-center justify-center gap-3 animate-fade-in text-sm text-muted-foreground">
          <Paperclip className="h-4 w-4 text-red-500"/>
-         <span className="italic">Context provided: "{displayContent}"</span>
+         <div className="italic"><SimpleMarkdown content={displayContent}/></div>
       </div>
     )
   }
@@ -173,10 +194,21 @@ export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStre
                 : 'bg-muted'
             )}
         >
-            {isUser ? displayContent : <SimpleMarkdown content={displayContent} />}
+            {isFileMessage ? (
+              <div className="flex items-center gap-2">
+                <FileIcon className="h-5 w-5" />
+                <span>{displayContent}</span>
+              </div>
+            ) : (isUser ? displayContent : <SimpleMarkdown content={displayContent} />)}
+
             {isLoading && content.length === 0 && (
                 <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="animate-pulse">Thinking...</span>
+                </div>
+            )}
+             {isLoading && content === 'Analyzing file...' && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="animate-pulse">{content}</span>
                 </div>
             )}
             {isStreaming && content.length > 0 && <span className="animate-pulse">▍</span>}

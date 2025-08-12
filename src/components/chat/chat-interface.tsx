@@ -12,11 +12,12 @@ import { Bot } from 'lucide-react';
 import type { Message, Conversation } from '@/lib/types';
 import { ChatInfoPanel } from './chat-info-panel';
 import { useSidebar } from '../ui/sidebar';
-import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
+import type { getVeniceResponse as getVeniceResponseType, getFileAnalysis as getFileAnalysisType } from '@/app/actions';
 import { useSettings } from '@/context/settings-context';
 import { textToSpeech } from '@/ai/flows/tts-flow';
 import { InfoDialog } from './info-dialog';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 
 interface ChatInterfaceProps {
@@ -26,10 +27,20 @@ interface ChatInterfaceProps {
   onConversationClear: (conversationId: string) => void;
   onMessageDelete: (messageId: string) => void;
   getVeniceResponse: typeof getVeniceResponseType;
+  getFileAnalysis: typeof getFileAnalysisType;
   lastMessageIsNew: boolean;
 }
 
-export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onConversationClear, onMessageDelete, getVeniceResponse, lastMessageIsNew }: ChatInterfaceProps) {
+export function ChatInterface({ 
+  conversation, 
+  onMessageAdd, 
+  onMessageUpdate, 
+  onConversationClear, 
+  onMessageDelete, 
+  getVeniceResponse, 
+  getFileAnalysis,
+  lastMessageIsNew 
+}: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
@@ -40,7 +51,8 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isInfoOpen, setIsInfoOpen] = useState(false);
-  const [isContextMode, setIsContextMode] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (audioRef.current) {
@@ -81,6 +93,69 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
     }
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsLoading(true);
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: `[FILE:${file.name}]`,
+    };
+    onMessageAdd(userMessage, true);
+    
+    const assistantMessageId = Date.now().toString() + '-ai-analysis';
+    onMessageAdd({ id: assistantMessageId, role: 'assistant', content: 'Analyzing file...' }, true);
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const fileDataUri = event.target?.result as string;
+        if (fileDataUri) {
+          const analysis = await getFileAnalysis(fileDataUri, file.name);
+          
+          if(analysis.fileType === 'error') {
+            onMessageUpdate(assistantMessageId, `Error: ${analysis.description}`);
+            setIsLoading(false);
+            return;
+          }
+
+          onMessageUpdate(assistantMessageId, `[CONTEXT]File Analyzed: **${file.name}** (${analysis.fileType})\n\n**Analysis:**\n${analysis.description}`);
+          setIsLoading(false);
+
+        }
+      };
+      reader.onerror = (error) => {
+        console.error('Error reading file:', error);
+        toast({
+          variant: 'destructive',
+          title: 'File Read Error',
+          description: 'Could not read the selected file.',
+        });
+        setIsLoading(false);
+      };
+      reader.readAsDataURL(file);
+
+    } catch (error) {
+       console.error('Error processing file:', error);
+       toast({
+          variant: 'destructive',
+          title: 'File Processing Error',
+          description: 'An error occurred while processing the file.',
+        });
+        onMessageUpdate(assistantMessageId, 'Sorry, there was an error processing your file.');
+        setIsLoading(false);
+    } finally {
+        // Reset file input
+        if(fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    }
+  };
+
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -100,17 +175,12 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: isContextMode ? `[CONTEXT]${input}` : input,
+      content: input,
     };
     
     onMessageAdd(userMessage, true);
     setInput('');
     setIsLoading(true);
-    if(isContextMode) {
-      setIsContextMode(false);
-      setIsLoading(false); // No AI response for context messages
-      return;
-    }
 
     const assistantMessageId = Date.now().toString() + '-ai';
     onMessageAdd({
@@ -136,8 +206,8 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
         if (settings.voiceModeEnabled) {
             try {
                 const ttsResponse = await textToSpeech({ text: accumulatedResponse, voice: settings.voice });
-                if (ttsResponse?.audio) {
-                    setAudioUrl(ttsResponse.audio);
+                if (ttsResponse?.media) {
+                    setAudioUrl(ttsResponse.media);
                 }
             } catch (e) {
                 console.error("TTS failed", e);
@@ -204,15 +274,23 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
       </main>
       <footer className="shrink-0 border-t border-border p-2 sm:p-4 bg-background">
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
-          <Button type="button" variant="ghost" size="icon" onClick={() => setIsContextMode(prev => !prev)}>
-            <Paperclip className={cn("h-4 w-4", isContextMode && "text-red-500")} />
+          <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
+            <Paperclip className="h-4 w-4" />
+            <span className="sr-only">Attach file</span>
           </Button>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange}
+            className="hidden"
+          />
           <Input
             value={input}
             onChange={handleInputChange}
-            placeholder={isContextMode ? "Add context for the AI..." : "Ask WormGPT..."}
+            placeholder={"Ask WormGPT..."}
             className="flex-1"
             autoComplete="off"
+            disabled={isLoading}
           />
           {isLoading ? (
             <Button type="button" variant="outline" size="icon" onClick={stopGenerating} aria-label="Stop generating">

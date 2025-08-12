@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Send, Trash2, Menu, Square, HelpCircle } from 'lucide-react';
+import { Send, Trash2, Menu, Square, HelpCircle, Paperclip } from 'lucide-react';
 import { ChatMessage } from './chat-message';
 import { Skeleton } from '../ui/skeleton';
 import { Bot } from 'lucide-react';
@@ -16,6 +16,7 @@ import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
 import { useSettings } from '@/context/settings-context';
 import { textToSpeech } from '@/ai/flows/tts-flow';
 import { InfoDialog } from './info-dialog';
+import { cn } from '@/lib/utils';
 
 
 interface ChatInterfaceProps {
@@ -39,6 +40,7 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isInfoOpen, setIsInfoOpen] = useState(false);
+  const [isContextMode, setIsContextMode] = useState(false);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -98,12 +100,17 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input,
+      content: isContextMode ? `[CONTEXT]${input}` : input,
     };
     
     onMessageAdd(userMessage, true);
     setInput('');
     setIsLoading(true);
+    if(isContextMode) {
+      setIsContextMode(false);
+      setIsLoading(false); // No AI response for context messages
+      return;
+    }
 
     const assistantMessageId = Date.now().toString() + '-ai';
     onMessageAdd({
@@ -127,9 +134,13 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
         }
 
         if (settings.voiceModeEnabled) {
-            const ttsResponse = await textToSpeech({ text: accumulatedResponse, voice: settings.voice });
-            if (ttsResponse?.media) {
-                setAudioUrl(ttsResponse.media);
+            try {
+                const ttsResponse = await textToSpeech({ text: accumulatedResponse, voice: settings.voice });
+                if (ttsResponse?.audio) {
+                    setAudioUrl(ttsResponse.audio);
+                }
+            } catch (e) {
+                console.error("TTS failed", e);
             }
         }
     } catch (error: any) {
@@ -193,10 +204,13 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
       </main>
       <footer className="shrink-0 border-t border-border p-2 sm:p-4 bg-background">
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
+          <Button type="button" variant="ghost" size="icon" onClick={() => setIsContextMode(prev => !prev)}>
+            <Paperclip className={cn("h-4 w-4", isContextMode && "text-red-500")} />
+          </Button>
           <Input
             value={input}
             onChange={handleInputChange}
-            placeholder="Ask WormGPT..."
+            placeholder={isContextMode ? "Add context for the AI..." : "Ask WormGPT..."}
             className="flex-1"
             autoComplete="off"
           />

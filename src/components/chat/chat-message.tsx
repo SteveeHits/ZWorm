@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bot, User, Copy, Check, Terminal, Link as LinkIcon, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Bot, User, Copy, Check, Terminal, Link as LinkIcon, MoreHorizontal, Trash2, Paperclip } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useState } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
@@ -128,15 +128,27 @@ const MessageActions = ({ isUser, canBeDeleted, onCopy, onDelete, copied }: Mess
 
 export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStreaming, isLoading }: ChatMessageProps) {
   const isUser = role === 'user';
+  const isContextMessage = content.startsWith('[CONTEXT]');
+  const displayContent = isContextMessage ? content.substring(9) : content;
+  
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(content);
+    navigator.clipboard.writeText(displayContent);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
   
   const canBeDeleted = id !== 'initial';
+
+  if (isContextMessage) {
+    return (
+      <div className="group flex items-center justify-center gap-3 animate-fade-in text-sm text-muted-foreground">
+         <Paperclip className="h-4 w-4 text-red-500"/>
+         <span className="italic">Context provided: "{displayContent}"</span>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -161,7 +173,7 @@ export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStre
                 : 'bg-muted'
             )}
         >
-            {isUser ? content : <SimpleMarkdown content={content} />}
+            {isUser ? displayContent : <SimpleMarkdown content={displayContent} />}
             {isLoading && content.length === 0 && (
                 <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="animate-pulse">Thinking...</span>

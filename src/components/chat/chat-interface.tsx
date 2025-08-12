@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Send, Trash2, Menu, Square } from 'lucide-react';
+import { Send, Trash2, Menu, Square, HelpCircle } from 'lucide-react';
 import { ChatMessage } from './chat-message';
 import { Skeleton } from '../ui/skeleton';
 import { Bot } from 'lucide-react';
@@ -15,6 +15,7 @@ import { useSidebar } from '../ui/sidebar';
 import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
 import { useSettings } from '@/context/settings-context';
 import { textToSpeech } from '@/ai/flows/tts-flow';
+import { InfoDialog } from './info-dialog';
 
 
 interface ChatInterfaceProps {
@@ -37,6 +38,7 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
   const { settings } = useSettings();
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -146,12 +148,16 @@ export function ChatInterface({ conversation, onMessageAdd, onMessageUpdate, onC
 
   return (
     <div className="flex h-screen flex-col bg-background">
+      <InfoDialog open={isInfoOpen} onOpenChange={setIsInfoOpen} />
        <header className="flex shrink-0 items-center gap-4 border-b border-border px-4 py-3 sm:px-6">
         <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
             <Menu className="h-5 w-5" />
         </Button>
         <h1 className="text-xl font-bold tracking-tight">{conversation.name}</h1>
         <div className="ml-auto flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={() => setIsInfoOpen(true)} aria-label="Show AI information">
+                <HelpCircle className="h-4 w-4" />
+            </Button>
             <Button variant="ghost" size="icon" onClick={() => onConversationClear(conversation.id)} aria-label="Clear conversation messages">
                 <Trash2 className="h-4 w-4" />
             </Button>

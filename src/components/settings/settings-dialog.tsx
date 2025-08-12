@@ -22,10 +22,10 @@ const themes = [
 ];
 
 const voices = [
-    { name: 'Algenib', label: 'Algenib (Female)' },
-    { name: 'Achernar', label: 'Achernar (Male)' },
-    { name: 'Hadar', label: 'Hadar (Female)' },
-    { name: 'Rigel', label: 'Rigel (Male)' },
+    { name: 'algenib', label: 'Algenib (Female)' },
+    { name: 'achernar', label: 'Achernar (Male)' },
+    { name: 'schedar', label: 'Schedar (Female)' },
+    { name: 'rasalgethi', label: 'Rasalgethi (Male)' },
 ];
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {

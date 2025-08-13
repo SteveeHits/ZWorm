@@ -121,8 +121,18 @@ export function ChatInterface({
             setIsLoading(false);
             return;
           }
+          
+          // For the user, show "Done."
+          onMessageUpdate(assistantMessageId, 'Done.');
+          
+          // For the AI, add the full analysis as a new context message.
+          const contextMessage: Message = {
+            id: Date.now().toString() + '-context',
+            role: 'user', // It's context from the user, for the AI
+            content: `[CONTEXT]${analysis.description}`,
+          };
+          onMessageAdd(contextMessage, false);
 
-          onMessageUpdate(assistantMessageId, `[CONTEXT]File Analyzed: **${file.name}** (${analysis.fileType})\n\n**Analysis:**\n${analysis.description}`);
           setIsLoading(false);
 
         }

@@ -23,7 +23,7 @@ const AnalyzeFileInputSchema = z.object({
 export type AnalyzeFileInput = z.infer<typeof AnalyzeFileInputSchema>;
 
 const AnalyzeFileOutputSchema = z.object({
-  description: z.string().describe('A detailed description of the file content.'),
+  description: z.string().describe('The extracted raw text content from the file.'),
   fileType: z.string().describe("The identified type of the file (e.g., 'image', 'text', 'code', 'unknown')."),
 });
 export type AnalyzeFileOutput = z.infer<typeof AnalyzeFileOutputSchema>;
@@ -33,17 +33,17 @@ const analysisPrompt = ai.definePrompt({
     name: 'fileAnalysisPrompt',
     input: { schema: AnalyzeFileInputSchema },
     output: { schema: AnalyzeFileOutputSchema },
-    prompt: `You are an expert file analyzer. Your task is to analyze the provided file and return a concise description and its file type.
+    prompt: `You are an expert text extractor. Your task is to analyze the provided file and extract all text content from it.
+
+If the file is an image, perform OCR to extract all text.
+If the file is a code file, extract the code.
+If the file is a document, extract all text.
+
+Return the full, raw, and unmodified text content.
 
 File Name: {{{fileName}}}
 File Content:
 {{media url=fileDataUri}}
-
-Analyze the file and provide:
-1.  A one-sentence summary of the file's content.
-2.  The type of file (e.g., 'image', 'typescript code', 'json', 'text', 'pdf', 'unknown').
-
-Be precise and brief in your analysis.
 `,
 });
 

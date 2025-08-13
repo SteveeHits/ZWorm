@@ -141,12 +141,13 @@ export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStre
   const isContextMessage = content.startsWith('[CONTEXT]');
   const isFileMessage = content.startsWith('[FILE:');
   
+  if (isContextMessage) {
+    return null; // Don't render context messages in the UI
+  }
+
   let displayContent = content;
-  if(isContextMessage) displayContent = content.substring(9);
   if(isFileMessage) displayContent = content.substring(content.indexOf(']') + 1, content.length);
   if(isFileMessage && !displayContent) displayContent = content.substring(6, content.length-1);
-
-
   
   const [copied, setCopied] = useState(false);
 
@@ -160,15 +161,6 @@ export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStre
   
   const isImageFile = (content: string) => {
     return content.startsWith('data:image');
-  }
-
-  if (isContextMessage) {
-    return (
-      <div className="group flex items-center justify-center gap-3 animate-fade-in text-sm text-muted-foreground">
-         <Paperclip className="h-4 w-4 text-red-500"/>
-         <div className="italic"><SimpleMarkdown content={displayContent}/></div>
-      </div>
-    )
   }
 
   return (

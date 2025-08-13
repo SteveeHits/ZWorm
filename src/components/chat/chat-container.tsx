@@ -101,13 +101,7 @@ export function ChatContainer({ getVeniceResponse, getFileAnalysis }: ChatContai
         setConversations(prev => prev.map(conv => {
             if (conv.id === activeConversationId) {
                 const newMessages = [...conv.messages, message];
-                const updatedConv = { ...conv, messages: newMessages, createdAt: new Date().toISOString() };
-                
-                if (conv.messages.length === 0 && message.role === 'user' && !message.content.startsWith('[FILE:')) {
-                    const newName = message.content.split(' ').slice(0, 4).join(' ');
-                    return { ...updatedConv, name: newName };
-                }
-                return updatedConv;
+                return { ...conv, messages: newMessages, createdAt: new Date().toISOString() };
             }
             return conv;
         }));

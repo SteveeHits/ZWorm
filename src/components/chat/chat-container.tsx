@@ -10,6 +10,7 @@ import { Input } from '../ui/input';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { SettingsDialog } from '../settings/settings-dialog';
 import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
+import { getFileAnalysis } from '@/app/actions';
 
 const initialConversation: Conversation = {
     id: '1',
@@ -32,9 +33,10 @@ const formatDate = (dateString: string) => {
 
 interface ChatContainerProps {
     getVeniceResponse: typeof getVeniceResponseType;
+    getFileAnalysis: typeof getFileAnalysis;
 }
 
-export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
+export function ChatContainer({ getVeniceResponse, getFileAnalysis }: ChatContainerProps) {
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
     const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
@@ -85,7 +87,7 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
         const newId = Date.now().toString();
         const newConversation: Conversation = {
             id: newId,
-            name: `New Chat`,
+            name: `WormGPT`,
             messages: [],
             createdAt: new Date().toISOString()
         };
@@ -101,7 +103,7 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
                 const newMessages = [...conv.messages, message];
                 const updatedConv = { ...conv, messages: newMessages, createdAt: new Date().toISOString() };
                 
-                if (conv.messages.length === 0 && message.role === 'user') {
+                if (conv.messages.length === 0 && message.role === 'user' && !message.content.startsWith('[FILE:')) {
                     const newName = message.content.split(' ').slice(0, 4).join(' ');
                     return { ...updatedConv, name: newName };
                 }
@@ -155,7 +157,7 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
             const newId = Date.now().toString();
             const newConversation: Conversation = {
                 id: newId,
-                name: `New Chat`,
+                name: `WormGPT`,
                 messages: [],
                 createdAt: new Date().toISOString()
             };
@@ -285,6 +287,7 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
                         onConversationClear={handleClearConversation}
                         onMessageDelete={handleMessageDelete}
                         getVeniceResponse={getVeniceResponse}
+                        getFileAnalysis={getFileAnalysis}
                         lastMessageIsNew={lastMessageIsNew}
                     />
                 ) : (
@@ -298,3 +301,5 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
         </div>
     );
 }
+
+    

@@ -60,16 +60,7 @@ function SimpleMarkdown({ content }: { content: string }) {
         return (
              <p key={key} className="leading-relaxed">
                 {parts.map((part, j) => {
-                    const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
-                    if (linkMatch) {
-                        return (
-                            <a key={j} href={linkMatch[2]} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:text-primary/80">
-                                {linkMatch[1]}
-                                <LinkIcon className="h-3 w-3" />
-                            </a>
-                        );
-                    }
-                     const boldMatch = part.match(/\*\*(.*?)\*\*/);
+                    const boldMatch = part.match(/\*\*(.*?)\*\*/);
                     if (boldMatch) {
                         return <strong key={j}>{boldMatch[1]}</strong>
                     }

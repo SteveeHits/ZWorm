@@ -55,11 +55,16 @@ function SimpleMarkdown({ content }: { content: string }) {
     let codeBlockContent = '';
     let codeBlockLang = '';
 
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+
     const renderParagraph = (line: string, key: string) => {
-        const parts = line.split(/(\[.*?\]\(.*?\))/g);
+        const parts = line.split(urlRegex);
         return (
-             <p key={key} className="leading-relaxed">
+             <p key={key} className="leading-relaxed whitespace-pre-wrap">
                 {parts.map((part, j) => {
+                    if (urlRegex.test(part)) {
+                        return <a key={j} href={part} target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-500">{part}</a>
+                    }
                     const boldMatch = part.match(/\*\*(.*?)\*\*/);
                     if (boldMatch) {
                         return <strong key={j}>{boldMatch[1]}</strong>

@@ -74,9 +74,15 @@ export async function getVeniceResponse(
       } catch (error) {
         console.error("Error reading stream:", error);
       } finally {
-        // The controller is already closed when data: [DONE] is received,
-        // or when the while loop breaks on `done`. Calling it again causes an error.
-        // We can safely remove this.
+        if (!controller.desiredSize) {
+          // Controller is not closed yet
+        } else if (controller.desiredSize! > 0) {
+            try {
+                controller.close();
+            } catch (e) {
+                // Ignore if already closed
+            }
+        }
       }
     },
   });

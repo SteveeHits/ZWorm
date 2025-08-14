@@ -188,6 +188,9 @@ export function ChatInterface({
       content: input,
     };
     
+    // Create an optimistic list of messages to send to the AI
+    const messagesForApi = [...conversation.messages, userMessage];
+    
     onMessageAdd(userMessage, true);
     setInput('');
     setIsLoading(true);
@@ -200,7 +203,7 @@ export function ChatInterface({
     }, true);
 
     try {
-        const stream = await getVeniceResponse([...conversation.messages, userMessage]);
+        const stream = await getVeniceResponse(messagesForApi);
         const reader = stream.getReader();
         const decoder = new TextDecoder();
         let accumulatedResponse = '';
@@ -227,6 +230,8 @@ export function ChatInterface({
         if (error.name !== 'AbortError') {
             const errorMessage = `Sorry, I am having trouble connecting to the AI. Error: ${error.message}`;
             onMessageUpdate(assistantMessageId, errorMessage);
+        } else {
+            onMessageUpdate(assistantMessageId, 'Request cancelled.');
         }
     } finally {
         setIsLoading(false);

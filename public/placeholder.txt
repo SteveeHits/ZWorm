@@ -1,0 +1,1 @@
+Please place your logo.png file in this 'public' directory. This file is a placeholder to ensure the directory is created. You can delete this file.

@@ -134,7 +134,7 @@ const MessageActions = ({ isUser, canBeDeleted, onCopy, onDelete, copied }: Mess
 
 export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStreaming, isLoading }: ChatMessageProps) {
   const isUser = role === 'user';
-  const isContextMessage = content.startsWith('[CONTEXT]');
+  const isContextMessage = content.startsWith('[CONTEXT]') || content.startsWith('[DEVICE_CONTEXT]');
   const isFileMessage = content.startsWith('[FILE:');
   
   if (isContextMessage) {

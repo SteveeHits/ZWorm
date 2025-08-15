@@ -15,10 +15,13 @@ export async function getVeniceResponse(
   
   const processedMessages = messages.map(m => {
     if (m.role === 'user' && m.content.startsWith('[CONTEXT]')) {
-      return { role: 'user', content: `[SYSTEM CONTEXT]: The user has provided the following context for your next response. Do not respond to this message directly, but use it as information for the next user prompt. Context: ${m.content.substring(9)}` };
+      return { role: 'system', content: `[SYSTEM CONTEXT]: The user has provided the following context for your next response. Do not respond to this message directly, but use it as information for the next user prompt. Context: ${m.content.substring(9)}` };
+    }
+    if (m.role === 'user' && m.content.startsWith('[DEVICE_CONTEXT]')) {
+      return { role: 'system', content: `The user's current device status is: ${m.content.substring(16)}. Use this information if the user asks about their device.` };
     }
     return { role: m.role, content: m.content };
-  });
+  }).filter(m => m.content);
 
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",

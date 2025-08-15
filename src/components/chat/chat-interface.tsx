@@ -165,6 +165,26 @@ export function ChatInterface({
     }
   };
 
+  const getDeviceContext = async (): Promise<string> => {
+    const now = new Date();
+    const time = now.toLocaleTimeString();
+    const date = now.toLocaleDateString();
+    let batteryContext = 'Battery status not available.';
+
+    if ('getBattery' in navigator) {
+      try {
+        const battery = await (navigator as any).getBattery();
+        const level = Math.floor(battery.level * 100);
+        const charging = battery.charging ? 'Charging' : 'Not Charging';
+        batteryContext = `Battery: ${level}%, Status: ${charging}`;
+      } catch (error) {
+        console.error('Could not get battery status:', error);
+      }
+    }
+
+    return `Time: ${time}, Date: ${date}, ${batteryContext}`;
+  }
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -176,24 +196,26 @@ export function ChatInterface({
       return;
     }
 
-    if (input.trim().toLowerCase() === 'info_check') {
-        setShowInfo(prev => !prev);
-        setInput('');
-        return;
-    }
-
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: input,
     };
     
-    // Create an optimistic list of messages to send to the AI
-    const messagesForApi = [...conversation.messages, userMessage];
-    
-    onMessageAdd(userMessage, true);
-    setInput('');
     setIsLoading(true);
+    setInput('');
+    
+    const deviceContext = await getDeviceContext();
+    const contextMessage: Message = {
+      id: Date.now().toString() + '-context',
+      role: 'user',
+      content: `[DEVICE_CONTEXT]${deviceContext}`,
+    };
+    onMessageAdd(contextMessage, false); // Add context message, not visible to user
+    onMessageAdd(userMessage, true); // Add user's visible message
+    
+    // Create an optimistic list of messages to send to the AI
+    const messagesForApi = [...conversation.messages, contextMessage, userMessage];
 
     const assistantMessageId = Date.now().toString() + '-ai';
     onMessageAdd({
@@ -240,7 +262,7 @@ export function ChatInterface({
     }
   };
   
-  const showWelcome = conversation.messages.length === 0;
+  const showWelcome = conversation.messages.filter(m => !m.content.startsWith('[CONTEXT]') && !m.content.startsWith('[DEVICE_CONTEXT]')).length === 0;
 
   return (
     <div className="flex h-screen flex-col bg-background">

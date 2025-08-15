@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { User, Copy, Check, Terminal, Link as LinkIcon, MoreHorizontal, Trash2, Paperclip, File as FileIcon } from 'lucide-react';
+import { User, Copy, Check, Terminal, Link as LinkIcon, MoreHorizontal, Trash2, Paperclip, File as FileIcon, RotateCw, Wand2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useState } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
@@ -15,6 +15,8 @@ interface ChatMessageProps {
   role: 'user' | 'assistant';
   content: string;
   onDelete: (id: string) => void;
+  onRetry: () => void;
+  onContinue: (id: string) => void;
   isLastMessage: boolean;
   isStreaming?: boolean;
   isLoading?: boolean;
@@ -132,9 +134,9 @@ const MessageActions = ({ isUser, canBeDeleted, onCopy, onDelete, copied }: Mess
 );
 
 
-export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStreaming, isLoading }: ChatMessageProps) {
+export function ChatMessage({ id, role, content, onDelete, onRetry, onContinue, isLastMessage, isStreaming, isLoading }: ChatMessageProps) {
   const isUser = role === 'user';
-  const isContextMessage = content.startsWith('[CONTEXT]') || content.startsWith('[DEVICE_CONTEXT]');
+  const isContextMessage = content.startsWith('[CONTEXT]') || content.startsWith('[DEVICE_CONTEXT]') || content.startsWith('[CONTINUE]');
   const isFileMessage = content.startsWith('[FILE:');
   
   if (isContextMessage) {
@@ -162,57 +164,72 @@ export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStre
   return (
     <div
       className={cn(
-        'group flex items-start gap-3 animate-fade-in',
-        isUser ? 'justify-end' : 'justify-start'
+        'group flex flex-col animate-fade-in',
+        isUser ? 'items-end' : 'items-start'
       )}
     >
-      {!isUser && (
-        <Avatar className="h-8 w-8 shrink-0 bg-black text-primary-foreground">
-           <Image src="/logo.png" alt="WormGPT" width={32} height={32} className="rounded-full" />
-        </Avatar>
-      )}
-      <div className={cn("flex items-start gap-1", isUser ? 'flex-row-reverse' : 'flex-row')}>
-        <div
-            className={cn(
-            'max-w-[75vw] sm:max-w-md md:max-w-lg lg:max-w-2xl rounded-lg p-3 text-sm shadow-md',
-            isUser
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted'
-            )}
-        >
-            {isFileMessage ? (
-              <div className="flex items-center gap-2">
-                <FileIcon className="h-5 w-5" />
-                <span>{displayContent}</span>
-              </div>
-            ) : (isUser ? displayContent : <SimpleMarkdown content={displayContent} />)}
+      <div className={cn('flex w-full items-start gap-3', isUser ? 'justify-end' : 'justify-start')}>
+        {!isUser && (
+          <Avatar className="h-8 w-8 shrink-0 bg-black text-primary-foreground">
+             <Image src="/logo.png" alt="WormGPT" width={32} height={32} className="rounded-full" />
+          </Avatar>
+        )}
+        <div className={cn("flex items-start gap-1", isUser ? 'flex-row-reverse' : 'flex-row')}>
+          <div
+              className={cn(
+              'max-w-[75vw] sm:max-w-md md:max-w-lg lg:max-w-2xl rounded-lg p-3 text-sm shadow-md',
+              isUser
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted'
+              )}
+          >
+              {isFileMessage ? (
+                <div className="flex items-center gap-2">
+                  <FileIcon className="h-5 w-5" />
+                  <span>{displayContent}</span>
+                </div>
+              ) : (isUser ? displayContent : <SimpleMarkdown content={displayContent} />)}
 
-            {isLoading && content.length === 0 && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                    <span className="animate-pulse">Thinking...</span>
-                </div>
-            )}
-             {isLoading && content === 'Analyzing file...' && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                    <span className="animate-pulse">{content}</span>
-                </div>
-            )}
-            {isStreaming && content.length > 0 && <span className="animate-pulse">▍</span>}
+              {isLoading && content.length === 0 && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="animate-pulse">Thinking...</span>
+                  </div>
+              )}
+               {isLoading && content === 'Analyzing file...' && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="animate-pulse">{content}</span>
+                  </div>
+              )}
+              {isStreaming && content.length > 0 && <span className="animate-pulse">▍</span>}
+          </div>
+          <MessageActions 
+            isUser={isUser}
+            canBeDeleted={canBeDeleted}
+            onCopy={handleCopy}
+            onDelete={() => onDelete(id)}
+            copied={copied}
+          />
         </div>
-        <MessageActions 
-          isUser={isUser}
-          canBeDeleted={canBeDeleted}
-          onCopy={handleCopy}
-          onDelete={() => onDelete(id)}
-          copied={copied}
-        />
+        {isUser && (
+          <Avatar className="h-8 w-8 shrink-0">
+            <AvatarFallback>
+              <User className="h-5 w-5" />
+            </AvatarFallback>
+          </Avatar>
+        )}
       </div>
-      {isUser && (
-        <Avatar className="h-8 w-8 shrink-0">
-          <AvatarFallback>
-            <User className="h-5 w-5" />
-          </AvatarFallback>
-        </Avatar>
+
+       {!isUser && !isStreaming && content.length > 0 && (
+        <div className="mt-2 flex items-center gap-2 pl-11 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onRetry}>
+              <RotateCw className="h-4 w-4" />
+              <span className="sr-only">Retry</span>
+           </Button>
+           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onContinue(id)}>
+              <Wand2 className="h-4 w-4" />
+              <span className="sr-only">Continue</span>
+           </Button>
+        </div>
       )}
     </div>
   );

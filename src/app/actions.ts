@@ -20,6 +20,9 @@ export async function getVeniceResponse(
     if (m.role === 'user' && m.content.startsWith('[DEVICE_CONTEXT]')) {
       return { role: 'system', content: `The user's current device status is: ${m.content.substring(16)}. Use this information if the user asks about their device.` };
     }
+     if (m.role === 'user' && m.content.startsWith('[CONTINUE]')) {
+      return { role: 'user', content: `Please continue generating from where you left off. Here is the last part of your response: "${m.content.substring(10)}"` };
+    }
     return { role: m.role, content: m.content };
   }).filter(m => m.content);
 

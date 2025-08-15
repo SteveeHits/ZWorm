@@ -186,9 +186,9 @@ export function ChatInterface({
   }
 
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
+    e?.preventDefault();
+    if (!input.trim() && e) return; // Only prevent empty submit from form
     setAudioUrl(null);
 
     if (isLoading) {
@@ -217,51 +217,96 @@ export function ChatInterface({
     // Create an optimistic list of messages to send to the AI
     const messagesForApi = [...conversation.messages, contextMessage, userMessage];
 
-    const assistantMessageId = Date.now().toString() + '-ai';
-    onMessageAdd({
-        id: assistantMessageId,
-        role: 'assistant',
-        content: '',
-    }, true);
-
-    try {
-        const stream = await getVeniceResponse(messagesForApi);
-        const reader = stream.getReader();
-        const decoder = new TextDecoder();
-        let accumulatedResponse = '';
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            accumulatedResponse += chunk;
-            onMessageUpdate(assistantMessageId, accumulatedResponse);
-        }
-
-        if (settings.voiceModeEnabled) {
-            try {
-                const ttsResponse = await textToSpeech({ text: accumulatedResponse, voice: settings.voice });
-                if (ttsResponse?.media) {
-                    setAudioUrl(ttsResponse.media);
-                }
-            } catch (e) {
-                console.error("TTS failed", e);
-            }
-        }
-    } catch (error: any) {
-        if (error.name !== 'AbortError') {
-            const errorMessage = `Sorry, I am having trouble connecting to the AI. Error: ${error.message}`;
-            onMessageUpdate(assistantMessageId, errorMessage);
-        } else {
-            onMessageUpdate(assistantMessageId, 'Request cancelled.');
-        }
-    } finally {
-        setIsLoading(false);
-        abortControllerRef.current = null;
-        setShowInfo(false);
-    }
+    await streamResponse(messagesForApi);
   };
   
+  const handleRetryResponse = async () => {
+    if (isLoading) return;
+  
+    const lastUserMessage = conversation.messages.filter(m => m.role === 'user' && !m.content.startsWith('[')).pop();
+    if (!lastUserMessage) return;
+  
+    // Find the last user message and the AI response that followed it.
+    const lastUserMessageIndex = conversation.messages.findIndex(m => m.id === lastUserMessage.id);
+    const messagesToDelete = conversation.messages.slice(lastUserMessageIndex + 1).map(m => m.id);
+    
+    // Delete the AI response and any subsequent context messages
+    onMessageDelete(messagesToDelete.join(','));
+  
+    setIsLoading(true);
+    const messagesForApi = conversation.messages.slice(0, lastUserMessageIndex + 1);
+    await streamResponse(messagesForApi);
+  };
+
+  const handleContinueResponse = async (messageId: string) => {
+    if (isLoading) return;
+
+    const messageToContinue = conversation.messages.find(m => m.id === messageId);
+    if (!messageToContinue) return;
+
+    setIsLoading(true);
+
+    const continueMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: `[CONTINUE]${messageToContinue.content}`,
+    };
+
+    // We don't add this to the visible chat history, it's just for the API
+    const messagesForApi = [...conversation.messages, continueMessage];
+    
+    // Start streaming, but update the original message
+    await streamResponse(messagesForApi, messageId);
+  };
+
+
+  const streamResponse = async (messages: Message[], messageIdToUpdate?: string) => {
+    let assistantMessageId = messageIdToUpdate;
+    if (!assistantMessageId) {
+      assistantMessageId = Date.now().toString() + '-ai';
+      onMessageAdd({ id: assistantMessageId, role: 'assistant', content: '' }, true);
+    }
+  
+    try {
+      const stream = await getVeniceResponse(messages);
+      const reader = stream.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedResponse = '';
+      const originalMessage = conversation.messages.find(m => m.id === assistantMessageId)?.content || '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        accumulatedResponse += chunk;
+        onMessageUpdate(assistantMessageId, originalMessage + accumulatedResponse);
+      }
+
+      if (settings.voiceModeEnabled) {
+        try {
+          const fullResponse = originalMessage + accumulatedResponse;
+          const ttsResponse = await textToSpeech({ text: fullResponse, voice: settings.voice });
+          if (ttsResponse?.media) {
+            setAudioUrl(ttsResponse.media);
+          }
+        } catch (e) {
+          console.error("TTS failed", e);
+        }
+      }
+    } catch (error: any) {
+      if (error.name !== 'AbortError') {
+        const errorMessage = `Sorry, I am having trouble connecting to the AI. Error: ${error.message}`;
+        onMessageUpdate(assistantMessageId, errorMessage);
+      } else {
+        onMessageUpdate(assistantMessageId, conversation.messages.find(m => m.id === assistantMessageId)?.content + ' (Cancelled)');
+      }
+    } finally {
+      setIsLoading(false);
+      abortControllerRef.current = null;
+      setShowInfo(false);
+    }
+  };
+
   const showWelcome = conversation.messages.filter(m => !m.content.startsWith('[CONTEXT]') && !m.content.startsWith('[DEVICE_CONTEXT]')).length === 0;
 
   return (
@@ -294,13 +339,15 @@ export function ChatInterface({
                         key={message.id} 
                         {...message} 
                         onDelete={onMessageDelete}
+                        onRetry={handleRetryResponse}
+                        onContinue={handleContinueResponse}
                         isLastMessage={index === conversation.messages.length - 1 && lastMessageIsNew} 
                         isStreaming={isLoading && index === conversation.messages.length - 1}
                         isLoading={isLoading && index === conversation.messages.length - 1}
                     />
                     ))}
                     {isLoading && conversation.messages[conversation.messages.length -1].role === 'user' && (
-                       <ChatMessage id="loading" role="assistant" content="" onDelete={() => {}} isLastMessage={true} isStreaming={true} isLoading={true} />
+                       <ChatMessage id="loading" role="assistant" content="" onDelete={() => {}} onRetry={() => {}} onContinue={() => {}} isLastMessage={true} isStreaming={true} isLoading={true} />
                     )}
                     {showInfo && <ChatInfoPanel />}
                 </div>

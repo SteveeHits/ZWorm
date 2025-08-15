@@ -4,11 +4,12 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bot, User, Copy, Check, Terminal, Link as LinkIcon, MoreHorizontal, Trash2, Paperclip, File as FileIcon } from 'lucide-react';
+import { User, Copy, Check, Terminal, Link as LinkIcon, MoreHorizontal, Trash2, Paperclip, File as FileIcon } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useState } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import Image from 'next/image';
+import { WormGPTSolidLogo } from '../icons';
 
 interface ChatMessageProps {
   id: string;
@@ -169,7 +170,7 @@ export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStre
       {!isUser && (
         <Avatar className="h-8 w-8 shrink-0 bg-primary text-primary-foreground">
           <AvatarFallback>
-            <Bot className="h-5 w-5" />
+            <WormGPTSolidLogo className="h-5 w-5" />
           </AvatarFallback>
         </Avatar>
       )}

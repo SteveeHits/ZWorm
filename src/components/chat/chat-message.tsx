@@ -167,7 +167,7 @@ export function ChatMessage({ id, role, content, onDelete, isLastMessage, isStre
       )}
     >
       {!isUser && (
-        <Avatar className="h-8 w-8 shrink-0 bg-primary text-primary-foreground">
+        <Avatar className="h-8 w-8 shrink-0 bg-black text-primary-foreground">
            <Image src="/logo.png" alt="WormGPT" width={32} height={32} className="rounded-full" />
         </Avatar>
       )}

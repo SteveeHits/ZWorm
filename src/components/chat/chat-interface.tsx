@@ -31,15 +31,15 @@ interface ChatInterfaceProps {
   lastMessageIsNew: boolean;
 }
 
-export function ChatInterface({ 
-  conversation, 
-  onMessageAdd, 
-  onMessageUpdate, 
-  onConversationClear, 
-  onMessageDelete, 
-  getVeniceResponse, 
+export function ChatInterface({
+  conversation,
+  onMessageAdd,
+  onMessageUpdate,
+  onConversationClear,
+  onMessageDelete,
+  getVeniceResponse,
   getImageAnalysis,
-  lastMessageIsNew 
+  lastMessageIsNew
 }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -121,12 +121,12 @@ export function ChatInterface({
                     return;
                 }
             } else if (file.type.startsWith('text/')) {
-                 const textContent = atob(dataUrl.split(',')[1]);
-                 messageContent = `Done. The user uploaded a file named "${file.name}". The content is:\n\n---\n\n${textContent}`;
+                   const textContent = atob(dataUrl.split(',')[1]);
+                   messageContent = `Done. The user uploaded a file named "${file.name}". The content is:\n\n---\n\n${textContent}`;
             } else {
-                 messageContent = `Done. The user uploaded a non-text file named "${file.name}" of type "${file.type}". I cannot read its content.`;
+                   messageContent = `Done. The user uploaded a non-text file named "${file.name}" of type "${file.type}". I cannot read its content.`;
             }
-            
+
             onMessageDelete(temporaryId);
             await handleSubmit(undefined, messageContent);
         };
@@ -149,10 +149,10 @@ export function ChatInterface({
     } catch (error) {
        console.error('Error processing file:', error);
        toast({
-          variant: 'destructive',
-          title: 'File Processing Error',
-          description: 'An error occurred while processing the file.',
-        });
+         variant: 'destructive',
+         title: 'File Processing Error',
+         description: 'An error occurred while processing the file.',
+       });
        onMessageDelete(temporaryId);
     } finally {
         if(fileInputRef.current) {
@@ -200,10 +200,10 @@ export function ChatInterface({
       role: 'user',
       content: messageContent,
     };
-    
+
     setIsLoading(true);
     setInput('');
-    
+
     const deviceContext = await getDeviceContext();
     const contextMessage: Message = {
       id: Date.now().toString() + '-context',
@@ -215,7 +215,7 @@ export function ChatInterface({
         onMessageAdd(contextMessage, false);
     }
     onMessageAdd(userMessage, true); // Add user's visible message
-    
+
     // Create an optimistic list of messages to send to the AI
     const messagesForApi = [...conversation.messages, contextMessage, userMessage].filter(m => !content || m.id !== userMessage.id);
     if(content) messagesForApi.push(userMessage);
@@ -223,20 +223,20 @@ export function ChatInterface({
 
     await streamResponse(messagesForApi);
   };
-  
+
   const handleRetryResponse = async () => {
     if (isLoading) return;
-  
+
     const lastUserMessage = conversation.messages.filter(m => m.role === 'user' && !m.content.startsWith('[')).pop();
     if (!lastUserMessage) return;
-  
+
     // Find the last user message and the AI response that followed it.
     const lastUserMessageIndex = conversation.messages.findIndex(m => m.id === lastUserMessage.id);
     const messagesToDelete = conversation.messages.slice(lastUserMessageIndex + 1).map(m => m.id);
-    
+
     // Delete the AI response and any subsequent context messages
     onMessageDelete(messagesToDelete.join(','));
-  
+
     setIsLoading(true);
     const messagesForApi = conversation.messages.slice(0, lastUserMessageIndex + 1);
     await streamResponse(messagesForApi);
@@ -258,7 +258,7 @@ export function ChatInterface({
 
     // We don't add this to the visible chat history, it's just for the API
     const messagesForApi = [...conversation.messages, continueMessage];
-    
+
     // Start streaming, but update the original message
     await streamResponse(messagesForApi, messageId);
   };
@@ -270,7 +270,7 @@ export function ChatInterface({
       assistantMessageId = Date.now().toString() + '-ai';
       onMessageAdd({ id: assistantMessageId, role: 'assistant', content: '' }, true);
     }
-  
+
     try {
       const stream = await getVeniceResponse(messages);
       const reader = stream.getReader();
@@ -314,7 +314,7 @@ export function ChatInterface({
   const showWelcome = conversation.messages.filter(m => !m.content.startsWith('[CONTEXT]') && !m.content.startsWith('[DEVICE_CONTEXT]')).length === 0;
 
   return (
-    <div className="flex h-screen flex-col bg-background">
+    <div className="flex h-full flex-col bg-background">
       <InfoDialog open={isInfoOpen} onOpenChange={setIsInfoOpen} />
        <header className="flex shrink-0 items-center gap-4 border-b border-border px-4 py-3 sm:px-6">
         <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
@@ -339,13 +339,13 @@ export function ChatInterface({
             <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>
                 <div className="space-y-6 p-4 md:p-6">
                     {conversation.messages.map((message, index) => (
-                    <ChatMessage 
-                        key={message.id} 
-                        {...message} 
+                    <ChatMessage
+                        key={message.id}
+                        {...message}
                         onDelete={onMessageDelete}
                         onRetry={handleRetryResponse}
                         onContinue={handleContinueResponse}
-                        isLastMessage={index === conversation.messages.length - 1 && lastMessageIsNew} 
+                        isLastMessage={index === conversation.messages.length - 1 && lastMessageIsNew}
                         isStreaming={isLoading && index === conversation.messages.length - 1}
                         isLoading={isLoading && index === conversation.messages.length - 1}
                     />
@@ -366,9 +366,9 @@ export function ChatInterface({
             <Paperclip className="h-4 w-4" />
             <span className="sr-only">Attach file</span>
           </Button>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
+          <input
+            type="file"
+            ref={fileInputRef}
             onChange={handleFileChange}
             className="hidden"
             disabled={isLoading}
@@ -376,7 +376,7 @@ export function ChatInterface({
           <Input
             value={input}
             onChange={handleInputChange}
-            placeholder={"Ask WormGPT..."}
+            placeholder={"Ask Me Anything..."}
             className="flex-1"
             autoComplete="off"
             disabled={isLoading}
@@ -391,7 +391,7 @@ export function ChatInterface({
             </Button>
           )}
         </form>
-         <audio ref={audioRef} className="hidden" />
+          <audio ref={audioRef} className="hidden" />
       </footer>
     </div>
   );

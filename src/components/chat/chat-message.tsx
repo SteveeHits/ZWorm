@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -62,7 +61,7 @@ function SimpleMarkdown({ content }: { content: string }) {
     const renderParagraph = (line: string, key: string) => {
         const parts = line.split(urlRegex);
         return (
-             <p key={key} className="leading-relaxed whitespace-pre-wrap">
+            <p key={key} className="leading-relaxed whitespace-pre-wrap">
                 {parts.map((part, j) => {
                     if (urlRegex.test(part)) {
                         return <a key={j} href={part} target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-500">{part}</a>
@@ -96,7 +95,7 @@ function SimpleMarkdown({ content }: { content: string }) {
             elements.push(renderParagraph(line, `p-${elements.length}`));
         }
     }
-     if (inCodeBlock) {
+      if (inCodeBlock) {
         elements.push(<CodeBlock key={`code-${elements.length}`} language={codeBlockLang} code={codeBlockContent.trim()} />);
     }
 
@@ -124,7 +123,7 @@ const MessageActions = ({ isUser, canBeDeleted, onCopy, onDelete, copied }: Mess
               Copy
           </DropdownMenuItem>
           {canBeDeleted && (
-              <DropdownMenuItem onClick={() => onDelete(id)} className="text-red-500 focus:text-red-500">
+              <DropdownMenuItem onClick={onDelete} className="text-red-500 focus:text-red-500">
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
               </DropdownMenuItem>
@@ -138,7 +137,7 @@ export function ChatMessage({ id, role, content, onDelete, onRetry, onContinue, 
   const isUser = role === 'user';
   const isContextMessage = content.startsWith('[CONTEXT]') || content.startsWith('[DEVICE_CONTEXT]') || content.startsWith('[CONTINUE]');
   const isFileMessage = content.startsWith('[FILE:');
-  
+
   if (isContextMessage) {
     return null; // Don't render context messages in the UI
   }
@@ -146,7 +145,7 @@ export function ChatMessage({ id, role, content, onDelete, onRetry, onContinue, 
   let displayContent = content;
   if(isFileMessage) displayContent = content.substring(content.indexOf(']') + 1, content.length);
   if(isFileMessage && !displayContent) displayContent = content.substring(6, content.length-1);
-  
+
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -154,9 +153,9 @@ export function ChatMessage({ id, role, content, onDelete, onRetry, onContinue, 
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  
+
   const canBeDeleted = id !== 'initial';
-  
+
   const isImageFile = (content: string) => {
     return content.startsWith('data:image');
   }
@@ -171,6 +170,7 @@ export function ChatMessage({ id, role, content, onDelete, onRetry, onContinue, 
       )}
     >
       <div className={cn('flex w-full items-start gap-3', isUser ? 'justify-end' : 'justify-start')}>
+        {/* AI Avatar */}
         {!isUser && (
           <Avatar className="h-8 w-8 shrink-0 bg-black text-primary-foreground">
              <Image src="/logo.png" alt="WormGPT" width={32} height={32} className="rounded-full" />
@@ -179,8 +179,8 @@ export function ChatMessage({ id, role, content, onDelete, onRetry, onContinue, 
         <div className={cn("flex items-start gap-1", isUser ? 'flex-row-reverse' : 'flex-row')}>
           <div
               className={cn(
-              'max-w-[75vw] sm:max-w-md md:max-w-lg lg:max-w-2xl rounded-lg p-3 text-sm shadow-md',
-              isUser
+                'max-w-[75vw] sm:max-w-md md:max-w-lg lg:max-w-2xl rounded-lg p-3 text-sm shadow-md',
+                isUser
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted'
               )}
@@ -197,14 +197,14 @@ export function ChatMessage({ id, role, content, onDelete, onRetry, onContinue, 
                       <span className="animate-pulse">Thinking...</span>
                   </div>
               )}
-               {isAnalysisMessage && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                      <span className="animate-pulse">{content}</span>
-                  </div>
-              )}
+                {isAnalysisMessage && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                        <span className="animate-pulse">{content}</span>
+                    </div>
+                )}
               {isStreaming && content.length > 0 && <span className="animate-pulse">▍</span>}
           </div>
-          <MessageActions 
+          <MessageActions
             isUser={isUser}
             canBeDeleted={canBeDeleted}
             onCopy={handleCopy}
@@ -212,25 +212,19 @@ export function ChatMessage({ id, role, content, onDelete, onRetry, onContinue, 
             copied={copied}
           />
         </div>
-        {isUser && (
-          <Avatar className="h-8 w-8 shrink-0">
-            <AvatarFallback>
-              <User className="h-5 w-5" />
-            </AvatarFallback>
-          </Avatar>
-        )}
+        {/* The user avatar section has been removed from here. */}
       </div>
 
-       {!isUser && !isStreaming && content.length > 0 && !isAnalysisMessage && (
+        {!isUser && !isStreaming && content.length > 0 && !isAnalysisMessage && (
         <div className="mt-2 flex items-center gap-2 pl-11 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onRetry}>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onRetry}>
               <RotateCw className="h-4 w-4" />
               <span className="sr-only">Retry</span>
-           </Button>
-           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onContinue(id)}>
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onContinue(id)}>
               <Wand2 className="h-4 w-4" />
               <span className="sr-only">Continue</span>
-           </Button>
+            </Button>
         </div>
       )}
     </div>

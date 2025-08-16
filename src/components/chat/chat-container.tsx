@@ -184,7 +184,7 @@ export function ChatContainer({ getVeniceResponse, getImageAnalysis }: ChatConta
     const sortedConversations = [...conversations].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return (
-        <div className="flex h-screen w-full bg-background">
+        <div className="flex w-full bg-background h-screen">
              <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
             <Sidebar>
                 <SidebarHeader className="p-3">
@@ -270,7 +270,7 @@ export function ChatContainer({ getVeniceResponse, getImageAnalysis }: ChatConta
                 </SidebarFooter>
             </Sidebar>
 
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col h-full">
                 {activeConversation ? (
                     <ChatInterface
                         key={activeConversation.id}

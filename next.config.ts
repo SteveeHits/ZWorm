@@ -21,7 +21,10 @@ const nextConfig: NextConfig = {
   experimental: {
     allowedDevOrigins: [
         "https://*.cluster-ubrd2huk7jh6otbgyei4h62ope.cloudworkstations.dev"
-    ]
+    ],
+    // Add this property to disable the Dev Tools UI
+    // This will remove the 'N' icon and other dev tool elements.
+    devIndicators: false, // <--- Add this line
   }
 };
 

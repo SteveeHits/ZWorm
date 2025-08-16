@@ -124,7 +124,7 @@ const MessageActions = ({ isUser, canBeDeleted, onCopy, onDelete, copied }: Mess
               Copy
           </DropdownMenuItem>
           {canBeDeleted && (
-              <DropdownMenuItem onClick={onDelete} className="text-red-500 focus:text-red-500">
+              <DropdownMenuItem onClick={() => onDelete(id)} className="text-red-500 focus:text-red-500">
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
               </DropdownMenuItem>
@@ -161,6 +161,8 @@ export function ChatMessage({ id, role, content, onDelete, onRetry, onContinue, 
     return content.startsWith('data:image');
   }
 
+  const isAnalysisMessage = content.startsWith('Analyzing file:');
+
   return (
     <div
       className={cn(
@@ -195,7 +197,7 @@ export function ChatMessage({ id, role, content, onDelete, onRetry, onContinue, 
                       <span className="animate-pulse">Thinking...</span>
                   </div>
               )}
-               {isLoading && content === 'Analyzing file...' && (
+               {isAnalysisMessage && (
                   <div className="flex items-center gap-2 text-muted-foreground">
                       <span className="animate-pulse">{content}</span>
                   </div>
@@ -219,7 +221,7 @@ export function ChatMessage({ id, role, content, onDelete, onRetry, onContinue, 
         )}
       </div>
 
-       {!isUser && !isStreaming && content.length > 0 && (
+       {!isUser && !isStreaming && content.length > 0 && !isAnalysisMessage && (
         <div className="mt-2 flex items-center gap-2 pl-11 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onRetry}>
               <RotateCw className="h-4 w-4" />

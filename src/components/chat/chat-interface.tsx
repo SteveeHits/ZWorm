@@ -97,44 +97,29 @@ export function ChatInterface({
     if (!file) return;
 
     setIsLoading(true);
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: `[FILE:${file.name}]`,
-    };
-    onMessageAdd(userMessage, true);
     
     const assistantMessageId = Date.now().toString() + '-ai-analysis';
-    onMessageAdd({ id: assistantMessageId, role: 'assistant', content: 'Analyzing file...' }, true);
+    onMessageAdd({ id: assistantMessageId, role: 'assistant', content: `Analyzing file: ${file.name}...` }, true);
 
     try {
       const reader = new FileReader();
       reader.onload = async (event) => {
         const fileDataUri = event.target?.result as string;
         if (fileDataUri) {
-          // The getFileAnalysis function is now a direct server action call
           const analysis = await getFileAnalysis(fileDataUri, file.name);
           
-          if(analysis.fileType === 'error') {
-            onMessageUpdate(assistantMessageId, `Error: ${analysis.description}`);
+          if(analysis.fileType === 'error' || !analysis.description) {
+            const errorMessage = analysis.description || 'Could not extract any content from the file.';
+            onMessageUpdate(assistantMessageId, `Error: ${errorMessage}`);
             setIsLoading(false);
             return;
           }
           
-          // For the user, show "Done."
-          onMessageUpdate(assistantMessageId, 'Done.');
+          // Remove the "Analyzing..." message
+          onMessageDelete(assistantMessageId);
           
-          // For the AI, add the full analysis as a new context message.
-          const contextMessage: Message = {
-            id: Date.now().toString() + '-context',
-            role: 'user', // It's context from the user, for the AI
-            content: `[CONTEXT]${analysis.description}`,
-          };
-          onMessageAdd(contextMessage, false);
-
-          setIsLoading(false);
-
+          // Treat the file content as a new user message and submit it
+          await handleSubmit(undefined, analysis.description);
         }
       };
       reader.onerror = (error) => {
@@ -145,6 +130,7 @@ export function ChatInterface({
           description: 'Could not read the selected file.',
         });
         setIsLoading(false);
+        onMessageDelete(assistantMessageId);
       };
       reader.readAsDataURL(file);
 
@@ -186,9 +172,11 @@ export function ChatInterface({
   }
 
 
-  const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>, fileContent?: string) => {
     e?.preventDefault();
-    if (!input.trim() && e) return; // Only prevent empty submit from form
+    const messageContent = fileContent || input;
+    if (!messageContent.trim()) return;
+
     setAudioUrl(null);
 
     if (isLoading) {
@@ -199,7 +187,7 @@ export function ChatInterface({
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input,
+      content: messageContent,
     };
     
     setIsLoading(true);
@@ -357,8 +345,8 @@ export function ChatInterface({
         )}
       </main>
       <footer className="shrink-0 border-t border-border p-2 sm:p-4 bg-background">
-        <form onSubmit={handleSubmit} className="flex items-center gap-2">
-          <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
+        <form onSubmit={(e) => handleSubmit(e)} className="flex items-center gap-2">
+          <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} disabled={isLoading}>
             <Paperclip className="h-4 w-4" />
             <span className="sr-only">Attach file</span>
           </Button>
@@ -367,6 +355,7 @@ export function ChatInterface({
             ref={fileInputRef} 
             onChange={handleFileChange}
             className="hidden"
+            disabled={isLoading}
           />
           <Input
             value={input}
@@ -381,7 +370,7 @@ export function ChatInterface({
                 <Square className="h-4 w-4" />
             </Button>
           ) : (
-            <Button type="submit" size="icon" aria-label="Send message">
+            <Button type="submit" size="icon" aria-label="Send message" disabled={!input.trim()}>
                 <Send className="h-4 w-4" />
             </Button>
           )}

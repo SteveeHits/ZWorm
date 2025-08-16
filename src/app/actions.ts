@@ -8,9 +8,7 @@ interface VeniceOutput {
   message: string;
 }
 
-const apiKeys = [
-  "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"
-];
+const apiKeys = process.env.OPENROUTER_API_KEY ? [process.env.OPENROUTER_API_KEY] : [];
 
 let currentApiKeyIndex = 0;
 
@@ -28,6 +26,17 @@ export async function getVeniceResponse(
   messages: Message[],
 ): Promise<ReadableStream<string>> {
   
+  if (apiKeys.length === 0) {
+    const controller = new AbortController();
+    const readableStream = new ReadableStream({
+      start(controller) {
+        controller.enqueue("Error: OPENROUTER_API_KEY is not set in the environment variables. Please add it to the .env file.");
+        controller.close();
+      }
+    });
+    return readableStream;
+  }
+
   const processedMessages = messages.map(m => {
     if (m.role === 'user' && m.content.startsWith('[CONTEXT]')) {
       return { role: 'system', content: `[SYSTEM CONTEXT]: The user has provided the following context for your next response. Do not respond to this message directly, but use it as information for the next user prompt. Context: ${m.content.substring(9)}` };

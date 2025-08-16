@@ -1,12 +1,11 @@
 
+'use server';
 /**
  * @fileOverview A flow for analyzing uploaded files using a generative AI model.
  *
  * - analyzeFileFlow - A function that takes file data and returns an analysis.
- * - AnalyzeFileInputSchema - The input schema for the analyzeFileFlow function.
- *   (not exported to prevent 'use server' issues)
- * - AnalyzeFileOutputSchema - The output schema for the analyzeFileFlow function.
- *   (not exported to prevent 'use server' issues)
+ * - AnalyzeFileInput - The input type for the analyzeFileFlow function.
+ * - AnalyzeFileOutput - The return type for the analyzeFileFlow function.
  */
 
 import { ai } from '@/ai/genkit';
@@ -23,7 +22,7 @@ const AnalyzeFileInputSchema = z.object({
 export type AnalyzeFileInput = z.infer<typeof AnalyzeFileInputSchema>;
 
 const AnalyzeFileOutputSchema = z.object({
-  description: z.string().describe('The extracted raw text content from the file.'),
+  description: z.string().describe('The extracted raw text content from the file. If no text is found, this should be an empty string.'),
   fileType: z.string().describe("The identified type of the file (e.g., 'image', 'text', 'code', 'unknown')."),
 });
 export type AnalyzeFileOutput = z.infer<typeof AnalyzeFileOutputSchema>;
@@ -33,16 +32,17 @@ const analysisPrompt = ai.definePrompt({
     name: 'fileAnalysisPrompt',
     input: { schema: AnalyzeFileInputSchema },
     output: { schema: AnalyzeFileOutputSchema },
-    prompt: `You are an expert text extractor. Your task is to analyze the provided file and extract all text content from it.
+    prompt: `You are an expert file analyst. Your task is to analyze the provided file, determine its type, and extract all text content from it.
 
-If the file is an image, perform OCR to extract all text.
-If the file is a code file, extract the code.
-If the file is a document, extract all text.
+Follow these steps:
+1.  **Determine the fileType**: Based on the file extension ('{{{fileName}}}') and content, classify it as one of: 'image', 'text', 'code', or 'unknown'.
+2.  **Extract Text**:
+    *   If the file is an 'image', perform OCR to extract all visible text. If no text is present, return an empty string for the description.
+    *   If the file is 'text' or 'code', extract the raw text content.
+    *   If the file is 'unknown' or you cannot extract text, return an empty string for the description.
+3.  **Return JSON**: Your output must be a valid JSON object matching the required schema, containing both 'fileType' and 'description'.
 
-Return the full, raw, and unmodified text content.
-
-File Name: {{{fileName}}}
-File Content:
+File to analyze:
 {{media url=fileDataUri}}
 `,
 });

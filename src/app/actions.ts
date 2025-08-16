@@ -151,7 +151,7 @@ export async function getFileAnalysis(fileDataUri: string, fileName: string): Pr
     console.error('Error analyzing file:', error);
     // Ensure the returned object matches the AnalyzeFileOutput type
     return {
-      description: `An error occurred while analyzing the file: ${error instanceof Error ? error.message : String(error)}. Please try again.`,
+      description: `An error occurred while analyzing the file. Please try again.`,
       fileType: 'error',
     };
   }

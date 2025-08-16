@@ -32,6 +32,26 @@ const analysisPrompt = ai.definePrompt({
     name: 'fileAnalysisPrompt',
     input: { schema: AnalyzeFileInputSchema },
     output: { schema: AnalyzeFileOutputSchema },
+    config: {
+        safetySettings: [
+          {
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold: 'BLOCK_NONE',
+          },
+          {
+            category: 'HARM_CATEGORY_HARASSMENT',
+            threshold: 'BLOCK_NONE',
+          },
+          {
+            category: 'HARM_CATEGORY_HATE_SPEECH',
+            threshold: 'BLOCK_NONE',
+          },
+          {
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            threshold: 'BLOCK_NONE',
+          },
+        ],
+    },
     prompt: `You are an expert file analyst. Your task is to analyze the provided file, determine its type, and extract all text content from it.
 
 Follow these steps:
@@ -59,3 +79,4 @@ export const analyzeFileFlow = ai.defineFlow(
     return output!;
   }
 );
+

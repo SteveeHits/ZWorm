@@ -2,6 +2,7 @@
 'use server';
 
 import type { Message } from '@/lib/types';
+import { analyzeImage } from '@/ai/flows/analyze-file-flow';
 
 interface VeniceOutput {
   message: string;
@@ -17,6 +18,16 @@ const apiKeys = [
 ];
 
 let currentApiKeyIndex = 0;
+
+export async function getImageAnalysis(imageDataUri: string): Promise<{ description: string }> {
+  try {
+    const result = await analyzeImage({ imageDataUri });
+    return { description: result.description };
+  } catch (error) {
+    console.error('Error in getImageAnalysis:', error);
+    throw new Error('Failed to analyze image.');
+  }
+}
 
 export async function getVeniceResponse(
   messages: Message[],

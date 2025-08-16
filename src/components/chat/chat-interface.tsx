@@ -12,7 +12,7 @@ import { Bot } from 'lucide-react';
 import type { Message, Conversation } from '@/lib/types';
 import { ChatInfoPanel } from './chat-info-panel';
 import { useSidebar } from '../ui/sidebar';
-import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
+import type { getVeniceResponse as getVeniceResponseType, getImageAnalysis as getImageAnalysisType } from '@/app/actions';
 import { useSettings } from '@/context/settings-context';
 import { textToSpeech } from '@/ai/flows/tts-flow';
 import { InfoDialog } from './info-dialog';
@@ -27,6 +27,7 @@ interface ChatInterfaceProps {
   onConversationClear: (conversationId: string) => void;
   onMessageDelete: (messageId: string) => void;
   getVeniceResponse: typeof getVeniceResponseType;
+  getImageAnalysis: typeof getImageAnalysisType;
   lastMessageIsNew: boolean;
 }
 
@@ -37,6 +38,7 @@ export function ChatInterface({
   onConversationClear, 
   onMessageDelete, 
   getVeniceResponse, 
+  getImageAnalysis,
   lastMessageIsNew 
 }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
@@ -96,26 +98,38 @@ export function ChatInterface({
     if (!file) return;
 
     const temporaryId = Date.now().toString() + '-file';
-    onMessageAdd({ id: temporaryId, role: 'user', content: `[FILE:${file.name}]`}, true);
+    onMessageAdd({ id: temporaryId, role: 'user', content: `Done: Uploading ${file.name}...` }, true);
 
     try {
         const reader = new FileReader();
-        
         reader.onload = async (event) => {
-            const fileContent = event.target?.result as string;
+            const dataUrl = event.target?.result as string;
             let messageContent = '';
 
-            if (file.type.startsWith('text/')) {
-                 messageContent = `The user has uploaded a file named "${file.name}". The content is:\n\n---\n\n${fileContent}`;
+            if (file.type.startsWith('image/')) {
+                try {
+                    const analysis = await getImageAnalysis(dataUrl);
+                    messageContent = `Done. The user uploaded an image named "${file.name}". The content is: ${analysis.description}`;
+                } catch (error) {
+                    console.error('Image analysis failed:', error);
+                    toast({
+                        variant: 'destructive',
+                        title: 'Image Analysis Failed',
+                        description: 'Could not analyze the uploaded image.',
+                    });
+                    onMessageDelete(temporaryId);
+                    return;
+                }
+            } else if (file.type.startsWith('text/')) {
+                 const textContent = atob(dataUrl.split(',')[1]);
+                 messageContent = `Done. The user uploaded a file named "${file.name}". The content is:\n\n---\n\n${textContent}`;
             } else {
-                 messageContent = `The user has uploaded a non-text file named "${file.name}" of type "${file.type}". I cannot read its content.`;
+                 messageContent = `Done. The user uploaded a non-text file named "${file.name}" of type "${file.type}". I cannot read its content.`;
             }
-
-            // Replace the temporary message with the real one
-            onMessageDelete(temporaryId); 
+            
+            onMessageDelete(temporaryId);
             await handleSubmit(undefined, messageContent);
         };
-
         reader.onerror = (error) => {
             console.error('Error reading file:', error);
             toast({
@@ -125,12 +139,11 @@ export function ChatInterface({
             });
             onMessageDelete(temporaryId);
         };
-        
+
         if (file.type.startsWith('text/')) {
-            reader.readAsText(file);
+            reader.readAsDataURL(file); // Read as data URL to get base64 for text
         } else {
-            // For non-text files, we don't read the content, just use the metadata.
-            reader.onload?.({ target: { result: '' } } as ProgressEvent<FileReader>);
+            reader.readAsDataURL(file); // Also read images as data URL
         }
 
     } catch (error) {
@@ -142,12 +155,12 @@ export function ChatInterface({
         });
        onMessageDelete(temporaryId);
     } finally {
-        // Reset file input
         if(fileInputRef.current) {
             fileInputRef.current.value = '';
         }
     }
 };
+
 
   const getDeviceContext = async (): Promise<string> => {
     const now = new Date();

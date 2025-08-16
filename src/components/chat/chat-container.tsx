@@ -9,7 +9,7 @@ import { PlusCircle, MessageSquare, Edit, Trash2, Settings } from 'lucide-react'
 import { Input } from '../ui/input';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { SettingsDialog } from '../settings/settings-dialog';
-import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
+import type { getVeniceResponse as getVeniceResponseType, getImageAnalysis as getImageAnalysisType } from '@/app/actions';
 
 const initialConversation: Conversation = {
     id: '1',
@@ -32,9 +32,10 @@ const formatDate = (dateString: string) => {
 
 interface ChatContainerProps {
     getVeniceResponse: typeof getVeniceResponseType;
+    getImageAnalysis: typeof getImageAnalysisType;
 }
 
-export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
+export function ChatContainer({ getVeniceResponse, getImageAnalysis }: ChatContainerProps) {
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
     const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
@@ -279,6 +280,7 @@ export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
                         onConversationClear={handleClearConversation}
                         onMessageDelete={handleMessageDelete}
                         getVeniceResponse={getVeniceResponse}
+                        getImageAnalysis={getImageAnalysis}
                         lastMessageIsNew={lastMessageIsNew}
                     />
                 ) : (

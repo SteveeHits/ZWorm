@@ -14,7 +14,6 @@ import { ChatInfoPanel } from './chat-info-panel';
 import { useSidebar } from '../ui/sidebar';
 import type { getVeniceResponse as getVeniceResponseType, getImageAnalysis as getImageAnalysisType } from '@/app/actions';
 import { useSettings } from '@/context/settings-context';
-import { textToSpeech } from '@/ai/flows/tts-flow';
 import { InfoDialog } from './info-dialog';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -48,21 +47,9 @@ export function ChatInterface({
   const { toggleSidebar } = useSidebar();
   const abortControllerRef = useRef<AbortController | null>(null);
   const { settings } = useSettings();
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
   const [isInfoOpen, setIsInfoOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.src = audioUrl || '';
-      if(audioUrl) {
-          audioRef.current.play().catch(e => console.error("Audio playback failed", e));
-      }
-    }
-  }, [audioUrl]);
-
 
   useEffect(() => {
     if (scrollAreaViewportRef.current) {
@@ -98,7 +85,7 @@ export function ChatInterface({
     if (!file) return;
 
     const temporaryId = Date.now().toString() + '-file';
-    onMessageAdd({ id: temporaryId, role: 'user', content: `Done: Uploading ${file.name}...` }, true);
+    onMessageAdd({ id: temporaryId, role: 'user', content: `Done. Uploading ${file.name}...` }, true);
 
     try {
         const reader = new FileReader();
@@ -126,7 +113,7 @@ export function ChatInterface({
             } else {
                    messageContent = `Done. The user uploaded a non-text file named "${file.name}" of type "${file.type}". I cannot read its content.`;
             }
-
+            
             onMessageDelete(temporaryId);
             await handleSubmit(undefined, messageContent);
         };
@@ -187,8 +174,6 @@ export function ChatInterface({
     e?.preventDefault();
     const messageContent = content || input;
     if (!messageContent.trim()) return;
-
-    setAudioUrl(null);
 
     if (isLoading) {
       stopGenerating();
@@ -286,17 +271,6 @@ export function ChatInterface({
         onMessageUpdate(assistantMessageId, originalMessage + accumulatedResponse);
       }
 
-      if (settings.voiceModeEnabled) {
-        try {
-          const fullResponse = originalMessage + accumulatedResponse;
-          const ttsResponse = await textToSpeech({ text: fullResponse, voice: settings.voice });
-          if (ttsResponse?.media) {
-            setAudioUrl(ttsResponse.media);
-          }
-        } catch (e) {
-          console.error("TTS failed", e);
-        }
-      }
     } catch (error: any) {
       if (error.name !== 'AbortError') {
         const errorMessage = `Sorry, I am having trouble connecting to the AI. Error: ${error.message}`;
@@ -391,7 +365,6 @@ export function ChatInterface({
             </Button>
           )}
         </form>
-          <audio ref={audioRef} className="hidden" />
       </footer>
     </div>
   );

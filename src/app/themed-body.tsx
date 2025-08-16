@@ -11,8 +11,14 @@ export const ThemedBody = ({ children }: { children: React.ReactNode }) => {
       className={cn(
         "font-body antialiased",
         settings.theme,
-        "animations-enabled"
+        "animations-enabled",
+        settings.backgroundAnimationsEnabled && 'background-animations-enabled'
       )}
+      style={{
+        backgroundImage: settings.backgroundAnimationsEnabled 
+          ? `linear-gradient(-45deg, hsl(var(--background)), hsl(var(--muted)), hsl(var(--background)))`
+          : 'none'
+      }}
     >
       {children}
     </body>

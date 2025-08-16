@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useSettings } from '@/context/settings-context';
-import { Palette, Maximize, SlidersHorizontal, Mic } from 'lucide-react';
+import { Palette, Maximize, SlidersHorizontal, Mic, Waves } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Switch } from '../ui/switch';
@@ -19,13 +19,6 @@ interface SettingsDialogProps {
 const themes = [
     { name: 'default', label: 'Default' },
     { name: 'theme-red', label: 'Red' },
-];
-
-const voices = [
-    { name: 'algenib', label: 'Algenib (Female)' },
-    { name: 'achernar', label: 'Achernar (Male)' },
-    { name: 'schedar', label: 'Schedar (Female)' },
-    { name: 'rasalgethi', label: 'Rasalgethi (Male)' },
 ];
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
@@ -69,39 +62,16 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                                     ))}
                                 </div>
                             </div>
-                        </div>
-
-                         <div className="space-y-4">
-                            <h3 className="text-lg font-medium flex items-center gap-2"><Mic className="h-5 w-5" /> Voice Settings</h3>
-                            <div className="flex items-center justify-between rounded-lg border p-3">
-                                <Label htmlFor="voice-mode" className="flex items-center gap-2">Voice Mode</Label>
+                             <div className="flex items-center justify-between rounded-lg border p-3">
+                                <Label htmlFor="bg-animations" className="flex items-center gap-2"><Waves className="h-5 w-5" /> Background Animations</Label>
                                 <Switch
-                                    id="voice-mode"
-                                    checked={localSettings.voiceModeEnabled}
-                                    onCheckedChange={(checked) => setLocalSettings(s => ({...s, voiceModeEnabled: checked}))}
+                                    id="bg-animations"
+                                    checked={localSettings.backgroundAnimationsEnabled}
+                                    onCheckedChange={(checked) => setLocalSettings(s => ({...s, backgroundAnimationsEnabled: checked}))}
                                 />
                             </div>
-                             <div className="space-y-2">
-                                <Label>Voice</Label>
-                                 <Select
-                                     value={localSettings.voice}
-                                     onValueChange={(value) => setLocalSettings(s => ({ ...s, voice: value }))}
-                                     disabled={!localSettings.voiceModeEnabled}
-                                 >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a voice" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {voices.map((voice) => (
-                                            <SelectItem key={voice.name} value={voice.name}>
-                                                {voice.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
                         </div>
-                        
+
                          <div className="space-y-4">
                              <h3 className="text-lg font-medium flex items-center gap-2"><SlidersHorizontal className="h-5 w-5" /> General</h3>
                              <div className="flex items-center justify-between rounded-lg border p-3">

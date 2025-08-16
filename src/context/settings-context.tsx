@@ -6,8 +6,7 @@ import { createContext, useContext, useState, useEffect, ReactNode, useCallback 
 interface Settings {
   fullscreen: boolean;
   theme: string;
-  voiceModeEnabled: boolean;
-  voice: string;
+  backgroundAnimationsEnabled: boolean;
 }
 
 interface SettingsContextType {
@@ -22,8 +21,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 const defaultSettings: Settings = {
   fullscreen: false,
   theme: 'default',
-  voiceModeEnabled: false,
-  voice: 'algenib',
+  backgroundAnimationsEnabled: true,
 };
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {

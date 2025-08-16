@@ -10,7 +10,6 @@ import { Input } from '../ui/input';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { SettingsDialog } from '../settings/settings-dialog';
 import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
-import { getFileAnalysis } from '@/app/actions';
 
 const initialConversation: Conversation = {
     id: '1',
@@ -33,10 +32,9 @@ const formatDate = (dateString: string) => {
 
 interface ChatContainerProps {
     getVeniceResponse: typeof getVeniceResponseType;
-    getFileAnalysis: typeof getFileAnalysis;
 }
 
-export function ChatContainer({ getVeniceResponse, getFileAnalysis }: ChatContainerProps) {
+export function ChatContainer({ getVeniceResponse }: ChatContainerProps) {
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
     const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
@@ -281,7 +279,6 @@ export function ChatContainer({ getVeniceResponse, getFileAnalysis }: ChatContai
                         onConversationClear={handleClearConversation}
                         onMessageDelete={handleMessageDelete}
                         getVeniceResponse={getVeniceResponse}
-                        getFileAnalysis={getFileAnalysis}
                         lastMessageIsNew={lastMessageIsNew}
                     />
                 ) : (
@@ -295,5 +292,3 @@ export function ChatContainer({ getVeniceResponse, getFileAnalysis }: ChatContai
         </div>
     );
 }
-
-    

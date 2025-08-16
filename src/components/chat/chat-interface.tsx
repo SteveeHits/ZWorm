@@ -13,7 +13,6 @@ import type { Message, Conversation } from '@/lib/types';
 import { ChatInfoPanel } from './chat-info-panel';
 import { useSidebar } from '../ui/sidebar';
 import type { getVeniceResponse as getVeniceResponseType } from '@/app/actions';
-import { getFileAnalysis } from '@/app/actions';
 import { useSettings } from '@/context/settings-context';
 import { textToSpeech } from '@/ai/flows/tts-flow';
 import { InfoDialog } from './info-dialog';
@@ -96,43 +95,43 @@ export function ChatInterface({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsLoading(true);
-    
-    const assistantMessageId = Date.now().toString() + '-ai-analysis';
-    onMessageAdd({ id: assistantMessageId, role: 'assistant', content: `Analyzing file: ${file.name}...` }, true);
+    const temporaryId = Date.now().toString() + '-file';
+    onMessageAdd({ id: temporaryId, role: 'user', content: `[FILE:${file.name}]`}, true);
 
     try {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const fileDataUri = event.target?.result as string;
-        if (fileDataUri) {
-          const analysis = await getFileAnalysis(fileDataUri, file.name);
-          
-          if(analysis.fileType === 'error' || !analysis.description) {
-            const errorMessage = analysis.description || 'Could not extract any content from the file.';
-            onMessageUpdate(assistantMessageId, `Error: ${errorMessage}`);
-            setIsLoading(false);
-            return;
-          }
-          
-          // Remove the "Analyzing..." message
-          onMessageDelete(assistantMessageId);
-          
-          // Treat the file content as a new user message and submit it
-          await handleSubmit(undefined, analysis.description);
+        const reader = new FileReader();
+        
+        reader.onload = async (event) => {
+            const fileContent = event.target?.result as string;
+            let messageContent = '';
+
+            if (file.type.startsWith('text/')) {
+                 messageContent = `The user has uploaded a file named "${file.name}". The content is:\n\n---\n\n${fileContent}`;
+            } else {
+                 messageContent = `The user has uploaded a non-text file named "${file.name}" of type "${file.type}". I cannot read its content.`;
+            }
+
+            // Replace the temporary message with the real one
+            onMessageDelete(temporaryId); 
+            await handleSubmit(undefined, messageContent);
+        };
+
+        reader.onerror = (error) => {
+            console.error('Error reading file:', error);
+            toast({
+                variant: 'destructive',
+                title: 'File Read Error',
+                description: 'Could not read the selected file.',
+            });
+            onMessageDelete(temporaryId);
+        };
+        
+        if (file.type.startsWith('text/')) {
+            reader.readAsText(file);
+        } else {
+            // For non-text files, we don't read the content, just use the metadata.
+            reader.onload?.({ target: { result: '' } } as ProgressEvent<FileReader>);
         }
-      };
-      reader.onerror = (error) => {
-        console.error('Error reading file:', error);
-        toast({
-          variant: 'destructive',
-          title: 'File Read Error',
-          description: 'Could not read the selected file.',
-        });
-        setIsLoading(false);
-        onMessageDelete(assistantMessageId);
-      };
-      reader.readAsDataURL(file);
 
     } catch (error) {
        console.error('Error processing file:', error);
@@ -141,15 +140,14 @@ export function ChatInterface({
           title: 'File Processing Error',
           description: 'An error occurred while processing the file.',
         });
-        onMessageUpdate(assistantMessageId, 'Sorry, there was an error processing your file.');
-        setIsLoading(false);
+       onMessageDelete(temporaryId);
     } finally {
         // Reset file input
         if(fileInputRef.current) {
             fileInputRef.current.value = '';
         }
     }
-  };
+};
 
   const getDeviceContext = async (): Promise<string> => {
     const now = new Date();
@@ -172,9 +170,9 @@ export function ChatInterface({
   }
 
 
-  const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>, fileContent?: string) => {
+  const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>, content?: string) => {
     e?.preventDefault();
-    const messageContent = fileContent || input;
+    const messageContent = content || input;
     if (!messageContent.trim()) return;
 
     setAudioUrl(null);
@@ -199,11 +197,16 @@ export function ChatInterface({
       role: 'user',
       content: `[DEVICE_CONTEXT]${deviceContext}`,
     };
-    onMessageAdd(contextMessage, false); // Add context message, not visible to user
+
+    if(!content) { // Don't add context if we're submitting from a file
+        onMessageAdd(contextMessage, false);
+    }
     onMessageAdd(userMessage, true); // Add user's visible message
     
     // Create an optimistic list of messages to send to the AI
-    const messagesForApi = [...conversation.messages, contextMessage, userMessage];
+    const messagesForApi = [...conversation.messages, contextMessage, userMessage].filter(m => !content || m.id !== userMessage.id);
+    if(content) messagesForApi.push(userMessage);
+
 
     await streamResponse(messagesForApi);
   };

@@ -9,12 +9,7 @@ interface VeniceOutput {
 }
 
 const apiKeys = [
-  "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",
-  "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",
-  "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",
-  "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",
-  "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",
-  "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"
+  "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"
 ];
 
 let currentApiKeyIndex = 0;
